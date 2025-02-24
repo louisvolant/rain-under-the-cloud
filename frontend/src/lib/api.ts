@@ -1,7 +1,6 @@
 // src/lib/api.ts
 import axios from 'axios';
 
-const BACKEND_URL = process.env.BACKEND_URL;
 console.log('BACKEND_URL:', process.env.BACKEND_URL);
 
 const api = axios.create({
@@ -17,9 +16,14 @@ export async function search(city: string) {
   return response.data;
 }
 
-
 export const getWeather = async (city: string) => {
   const url = `/api/weather?city=${city}`;
+  const response = await api.get(url);
+  return response.data;
+};
+
+export const getForecast = async (latitude: string, longitude: string) => {
+  const url = `/api/forecast?lat=${latitude}&lon=${longitude}`;
   const response = await api.get(url);
   return response.data;
 };
@@ -30,8 +34,14 @@ export const getPrecipitation = async (latitude: string, longitude: string, date
   return response.data;
 };
 
-export const getForecast = async (latitude: string, longitude: string) => {
-  const url = `/api/forecast?lat=${latitude}&lon=${longitude}`;
+export const getOneCallTimeMachine = async (latitude: string, longitude: string, date: string) => {
+  const url = `/api/onecalltimemachine?lat=${latitude}&lon=${longitude}&date=${date}`;
+  const response = await api.get(url);
+  return response.data;
+};
+
+export const getOneCallDaySummary = async (latitude: string, longitude: string, date: string) => {
+  const url = `/api/onecalldaysummary?lat=${latitude}&lon=${longitude}&date=${date}`;
   const response = await api.get(url);
   return response.data;
 };

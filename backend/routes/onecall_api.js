@@ -4,8 +4,10 @@ const express = require('express');
 const axios = require('axios');
 const router = express.Router();
 const API_KEY = process.env.OPENWEATHER_API_KEY;
+const ONECALL_V3_TIMEMACHINE_API = "https://api.openweathermap.org/data/3.0/onecall/timemachine";
+const ONECALL_V3_DAY_SUMMARY_API = "https://api.openweathermap.org/data/3.0/onecall/day_summary";
 
-router.get('/onecall', async (req, res) => {
+router.get('/onecalltimemachine', async (req, res) => {
     const { lat, lon, date } = req.query;
     if (!lat || !lon || !date) {
         return res.status(400).send({ error: "Latitude, Longitude and Date parameters are required" });
@@ -15,7 +17,7 @@ router.get('/onecall', async (req, res) => {
     const timestamp = new Date(date).getTime() / 1000; // Convert to seconds
 
     try {
-        const response = await axios.get('https://api.openweathermap.org/data/3.0/onecall/timemachine', {
+        const response = await axios.get(ONECALL_V3_TIMEMACHINE_API, {
             params: {
                 lat: lat,
                 lon: lon,
@@ -44,7 +46,7 @@ router.get('/onecalldaysummary', async (req, res) => {
     }
 
     try {
-        const response = await axios.get('https://api.openweathermap.org/data/3.0/onecall/day_summary', {
+        const response = await axios.get(ONECALL_V3_DAY_SUMMARY_API, {
             params: {
                 lat: lat,
                 lon: lon,

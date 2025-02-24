@@ -4,7 +4,7 @@ const express = require('express');
 const axios = require('axios');
 const router = express.Router();
 const API_KEY = process.env.OPENWEATHER_API_KEY;
-
+const ACCUMULATED_TEMPERATURE_API = "http://history.openweathermap.org/data/2.5/history/accumulated_temperature";
 
 router.get('/precipitations', async (req, res) => {
     const { lat, lon, date } = req.query;
@@ -19,7 +19,7 @@ router.get('/precipitations', async (req, res) => {
     try {
         // Log request before sending
         console.log('Requesting precipitation data with:', {
-            url: 'http://history.openweathermap.org/data/2.5/history/accumulated_temperature',
+            url: ACCUMULATED_TEMPERATURE_API,
             params: {
                 lat: lat,
                 lon: lon,
@@ -29,7 +29,7 @@ router.get('/precipitations', async (req, res) => {
             }
         });
 
-        const response = await axios.get('http://history.openweathermap.org/data/2.5/history/accumulated_temperature', {
+        const response = await axios.get(ACCUMULATED_TEMPERATURE_API, {
             params: {
                 lat: lat,
                 lon: lon,
