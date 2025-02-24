@@ -1,14 +1,14 @@
+//src/app/page.tsx
+
 'use client';
 
 import { useState } from 'react';
 import Image from 'next/image';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { search, getWeather, getPrecipitation, getForecast } from "@/lib/api";
 
 // Default number of days
 const DEFAULT_DAYS = 3;
-
-const BACKEND_URL = process.env.BACKEND_URL;
-console.log('BACKEND_URL:', process.env.BACKEND_URL);
 
 // Define types for weather data and location
 interface Location {
@@ -55,26 +55,25 @@ export default function Home() {
   const [precipitationData, setPrecipitationData] = useState<PrecipitationData[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  // Handle city search
-  const handleSearch = async () => {
-    try {
-      const response = await fetch(`${BACKEND_URL}/search?city=${city}`);
-      const data = await response.json();
-      setLocations(data);
-      setError(null);
-    } catch {
-      setError('Failed to fetch locations');
-      setLocations([]);
-    }
-  };
+    // Handle city search
+    const handleSearch = async () => {
+      try {
+        const data = await search(city);
+        setLocations(data);
+        setError(null);
+      } catch (error) {
+        console.error('Error fetching locations:', error);
+        setError('Failed to fetch locations');
+        setLocations([]);
+      }
+    };
 
   // Handle location selection
   const handleLocationClick = async (location: Location) => {
     try {
-      const response = await fetch(`${BACKEND_URL}/weather?lat=${location.lat}&lon=${location.lon}`);
-      const data = await response.json();
+      const data = await getWeather(location.name);
       setWeatherData(data);
-      setLocations([]); // Clear location suggestions
+      setLocations([]);
       setError(null);
     } catch {
       setError('Failed to fetch weather data');
@@ -85,8 +84,7 @@ export default function Home() {
   const handleShowForecast = async () => {
     if (!weatherData) return;
     try {
-      const response = await fetch(`${BACKEND_URL}/forecast?lat=${weatherData.coord.lat}&lon=${weatherData.coord.lon}`);
-      const data = await response.json();
+      const data = await getForecast(weatherData.coord.lat, weatherData.coord.lon);
       setForecastData(data);
       setError(null);
     } catch {
@@ -94,18 +92,28 @@ export default function Home() {
     }
   };
 
-  // Fetch precipitation data
-  const fetchPrecipitations = async () => {
-    if (!weatherData) return;
-    try {
-      const response = await fetch(`${BACKEND_URL}/precipitation?lat=${weatherData.coord.lat}&lon=${weatherData.coord.lon}&days=${numDays}`);
-      const data = await response.json();
-      setPrecipitationData(data);
-      setError(null);
-    } catch {
-      setError('Failed to fetch precipitation data');
+// Fetch precipitation data
+const fetchPrecipitations = async () => {
+  if (!weatherData) return;
+  try {
+    const precipitationDataPromises = [];
+    const today = new Date();
+
+    for (let i = 1; i <= numDays; i++) {
+      const date = new Date(today);
+      date.setDate(today.getDate() - i);
+      const formattedDate = date.toISOString().split('T')[0]; // Format date as YYYY-MM-DD
+      precipitationDataPromises.push(getPrecipitation(weatherData.coord.lat, weatherData.coord.lon, formattedDate));
     }
-  };
+
+    const data = await Promise.all(precipitationDataPromises);
+    setPrecipitationData(data);
+    setError(null);
+  } catch (error) {
+    console.error('Error fetching precipitation data:', error);
+    setError('Failed to fetch precipitation data');
+  }
+};
 
   // Chart rendering functions
   const renderPrecipitationChart = () => (
