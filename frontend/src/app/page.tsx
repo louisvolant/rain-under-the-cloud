@@ -66,6 +66,7 @@ export default function Home() {
   const [city, setCity] = useState('');
   const [locations, setLocations] = useState<Location[]>([]);
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
+  const [rainFallsData, setRainFallsData] = useState<number | null>(null);
   const [snowDepthData, setSnowDepthData] = useState<number | null>(null);
   const [forecastData, setForecastData] = useState<ForecastData | null>(null);
   const [precipitationData, setPrecipitationData] = useState<PrecipitationData[]>([]);
@@ -82,6 +83,7 @@ export default function Home() {
       setWeatherData(null);
       setForecastData(null);
       setPrecipitationData([]);
+      setRainFallsData(null);
       setSnowDepthData(null);
       setShowGraphs(false); // Reset graph visibility on new search
       setNoResults(false);
@@ -151,10 +153,11 @@ export default function Home() {
   // Handle location selection
   const handleLocationClick = async (location: Location) => {
     try {
-      const { weather, snowDepth } = await getWeatherAndSnow(location.lat, location.lon);
+      const { weather, rainFalls, snowDepth } = await getWeatherAndSnow(location.lat, location.lon);
       if (weather) {
         weather.name = location.name;
         setWeatherData(weather);
+        setRainFallsData(rainFalls);
         setSnowDepthData(snowDepth);
         setLocations([]);
         setError(null);
@@ -339,27 +342,24 @@ export default function Home() {
           </div>
         )}
 
-        {weatherData && (
-          <div className="p-4 bg-blue-100 dark:bg-blue-900 rounded mb-4 text-gray-900 dark:text-gray-200">
-            <h2 className="text-xl mb-2">Weather for {weatherData.name}</h2>
-            <p>Temperature: {weatherData.main.temp}°C</p>
-            <p>Feels like: {weatherData.main.feels_like}°C</p>
-            <p>Description: {weatherData.weather[0].description}</p>
-            <p>Wind: {weatherData.wind.speed} m/s, direction {weatherData.wind.deg}°</p>
-            <p>Clouds: {weatherData.clouds.all}%</p>
-            <p>Visibility: {weatherData.visibility / 1000} km</p>
-            <p>Coordinates: Lat {weatherData.coord.lat}, Lon {weatherData.coord.lon}</p>
-            <p>Sunrise: {new Date(weatherData.sys.sunrise * 1000).toLocaleTimeString()}</p>
-            <p>Sunset: {new Date(weatherData.sys.sunset * 1000).toLocaleTimeString()}</p>
-            <p>Humidity: {weatherData.main.humidity}%</p>
-            <p>Pressure: {weatherData.main.pressure} hPa</p>
-            {snowDepthData !== null ? (
-              <p>Snow falls for today: {snowDepthData.toFixed(1)} cm</p>
-            ) : (
-              <p>Snow falls for today: No data available</p>
-            )}
-          </div>
-        )}
+    {weatherData && (
+      <div className="p-4 bg-blue-100 dark:bg-blue-900 rounded mb-4 text-gray-900 dark:text-gray-200">
+        <h2 className="text-xl mb-2">Weather for {weatherData.name}</h2>
+        <p>Temperature: {weatherData.main.temp}°C</p>
+        <p>Feels like: {weatherData.main.feels_like}°C</p>
+        <p>Description: {weatherData.weather[0].description}</p>
+        <p>Wind: {weatherData.wind.speed} m/s, direction {weatherData.wind.deg}°</p>
+        <p>Clouds: {weatherData.clouds.all}%</p>
+        <p>Visibility: {weatherData.visibility != null && weatherData.visibility !== null ? `${weatherData.visibility / 1000} km` : 'No data available'}</p>
+        <p>Coordinates: Lat {weatherData.coord.lat}, Lon {weatherData.coord.lon}</p>
+        <p>Sunrise: {new Date(weatherData.sys.sunrise * 1000).toLocaleTimeString()}</p>
+        <p>Sunset: {new Date(weatherData.sys.sunset * 1000).toLocaleTimeString()}</p>
+        <p>Humidity: {weatherData.main.humidity}%</p>
+        <p>Pressure: {weatherData.main.pressure} hPa</p>
+        <p>Total rain falls for today: {rainFallsData !== null ? rainFallsData.toFixed(1) + ' mm' : 'No data available'}</p>
+        <p>Total snow falls for today: {snowDepthData !== null ? snowDepthData.toFixed(1) + ' cm' : 'No data available'}</p>
+      </div>
+    )}
 
         {weatherData && (
           <>

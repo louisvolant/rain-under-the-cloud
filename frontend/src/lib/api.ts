@@ -46,11 +46,14 @@ export const getWeatherAndSnow = async (latitude: number, longitude: number) => 
       sys: { sunrise: currentData.sunrise, sunset: currentData.sunset },
     };
 
+    // Extract rain Falls from the first day's data (in mm)
+    const rainFalls = dailyData[0].rain ?? null;
+
     // Extract snow depth from the first day's data (in mm) and convert to cm
     const snowDepthMm = dailyData[0].snow ?? null;
     const snowDepth = snowDepthMm !== null ? snowDepthMm / 10 : null;
 
-    return { weather: weatherData, snowDepth };
+    return { weather: weatherData, rainFalls, snowDepth };
   } catch (error) {
     console.error('Error fetching weather and snow data:', error);
     return { weather: null, snowDepth: null };
