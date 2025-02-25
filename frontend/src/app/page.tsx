@@ -37,10 +37,6 @@ interface WeatherData {
   sys: { sunrise: number; sunset: number };
 }
 
-interface SnowDepthData {
-  depth: number | null;
-}
-
 interface PrecipitationData {
   date: string;
   precipitation: number;

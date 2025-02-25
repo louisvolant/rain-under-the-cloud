@@ -9,8 +9,8 @@ const apiRoutes = require('./routes/api');
 
 const app = express();
 
-// Initialize apicache with a 10-minute cache duration
-const cache = apicache.middleware('10 minutes');
+// Initialize apicache with a 1 hour cache duration
+const cache = apicache.middleware('1 hour');
 
 app.use(express.json());
 app.use(cors({
