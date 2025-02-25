@@ -66,13 +66,14 @@ const getDistance = (lat1: number, lon1: number, lat2: number, lon2: number): nu
 };
 
 export default function Home() {
-  const [numDays, setNumDays] = useState(DEFAULT_DAYS);
+  const [numDays, setNumDays] = useState<number | string>(DEFAULT_DAYS); // Allow string for empty state
   const [city, setCity] = useState('');
   const [locations, setLocations] = useState<Location[]>([]);
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
   const [snowDepthData, setSnowDepthData] = useState<number | null>(null);
   const [forecastData, setForecastData] = useState<ForecastData | null>(null);
   const [precipitationData, setPrecipitationData] = useState<PrecipitationData[]>([]);
+  const [isLoadingPrecipitation, setIsLoadingPrecipitation] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [noResults, setNoResults] = useState(false);
   const [showGraphs, setShowGraphs] = useState(false); // New state for graph visibility
@@ -181,39 +182,66 @@ export default function Home() {
     }
   };
 
-  // Fetch precipitation data
-  const fetchPrecipitations = async () => {
-    if (!weatherData) return;
-    try {
-      setShowGraphs(true); // Show graph containers before fetching data
-      const precipitationDataPromises = [];
-      const today = new Date();
-
-      for (let i = 1; i <= numDays; i++) {
-        const date = new Date(today);
-        date.setDate(today.getDate() - i);
-        const formattedDate = date.toISOString().split('T')[0];
-        precipitationDataPromises.push(
-          getOneCallDaySummary(weatherData.coord.lat.toString(), weatherData.coord.lon.toString(), formattedDate)
-        );
-      }
-
-      const responses = await Promise.all(precipitationDataPromises);
-      const transformedData = responses.map((response) => ({
-        date: new Date(response.date).toLocaleDateString(),
-        precipitation: response.precipitation?.total || 0,
-        humidity: response.humidity?.afternoon || 0,
-        cloudCover: response.cloud_cover?.afternoon || 0,
-      }));
-
-      setPrecipitationData(transformedData);
-      setError(null);
-    } catch (error) {
-      console.error('Error fetching precipitation data:', error);
-      setError('Failed to fetch precipitation data');
-      setShowGraphs(false); // Hide graphs if fetch fails
+  // Handle input change
+  const handleNumDaysChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value === '' || !isNaN(parseInt(value))) {
+      setNumDays(value === '' ? '' : parseInt(value));
     }
   };
+
+  // Handle blur to enforce a valid number
+  const handleNumDaysBlur = () => {
+    const numValue = typeof numDays === 'string' ? parseInt(numDays) : numDays;
+    if (numDays === '' || isNaN(numValue) || numValue < 1) {
+      setNumDays(DEFAULT_DAYS);
+    }
+  };
+
+  // Update fetchPrecipitations to handle numDays as number
+   const fetchPrecipitations = async () => {
+     if (!weatherData) return;
+     try {
+       setIsLoadingPrecipitation(true);
+       setShowGraphs(true);
+       const precipitationDataPromises = [];
+       const today = new Date();
+       const days = typeof numDays === 'string' ? parseInt(numDays) || DEFAULT_DAYS : numDays;
+
+       for (let i = 1; i <= days; i++) {
+         const date = new Date(today);
+         date.setDate(today.getDate() - i);
+         const formattedDate = date.toISOString().split('T')[0];
+         precipitationDataPromises.push(
+           getOneCallDaySummary(weatherData.coord.lat.toString(), weatherData.coord.lon.toString(), formattedDate)
+         );
+       }
+
+       const responses = await Promise.all(precipitationDataPromises);
+       const transformedData = responses.map((response) => ({
+         date: new Date(response.date).toLocaleDateString(),
+         precipitation: response.precipitation?.total || 0,
+         humidity: response.humidity?.afternoon || 0,
+         cloudCover: response.cloud_cover?.afternoon || 0,
+       }));
+
+       setPrecipitationData(transformedData.reverse());
+       setError(null);
+     } catch (error) {
+       console.error('Error fetching precipitation data:', error);
+       setError('Failed to fetch precipitation data');
+       setShowGraphs(false);
+     } finally {
+       setIsLoadingPrecipitation(false);
+     }
+   };
+
+    // Spinner component using Tailwind CSS
+    const Spinner = () => (
+      <div className="flex justify-center items-center h-full">
+        <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
 
 
   // Chart rendering functions
@@ -369,35 +397,48 @@ export default function Home() {
           </>
         )}
 
-        {weatherData && (
-          <div className="mb-4">
-            <label htmlFor="numDays" className="mr-2 text-gray-900 dark:text-gray-200">
-              Number of days:
-            </label>
-            <input
-              type="number"
-              id="numDays"
-              value={numDays}
-              onChange={(e) => setNumDays(parseInt(e.target.value) || DEFAULT_DAYS)}
-              min="1"
-              className="border rounded p-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-        )}
+    {weatherData && (
+      <div className="mb-4">
+        <label htmlFor="numDays" className="mr-2 text-gray-900 dark:text-gray-200">
+          Number of days:
+        </label>
+        <input
+          type="number"
+          id="numDays"
+          value={numDays}
+          onChange={handleNumDaysChange}
+          onBlur={handleNumDaysBlur}
+          min="1"
+          className="border rounded p-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+    )}
 
         {showGraphs && (
           <div className="mt-4">
             <div className="bg-white dark:bg-gray-800 p-4 rounded shadow" style={{ minHeight: '380px' }}>
               <h3 className="text-lg font-medium mb-2 text-gray-900 dark:text-white">Precipitation (last {numDays} days)</h3>
-              {precipitationData.length > 0 && renderPrecipitationChart()}
+              {isLoadingPrecipitation ? (
+                <Spinner />
+              ) : (
+                precipitationData.length > 0 && renderPrecipitationChart()
+              )}
             </div>
             <div className="bg-white dark:bg-gray-800 p-4 rounded shadow mt-4" style={{ minHeight: '380px' }}>
               <h3 className="text-lg font-medium mb-2 text-gray-900 dark:text-white">Humidity (last {numDays} days)</h3>
-              {precipitationData.length > 0 && renderHumidityChart()}
+              {isLoadingPrecipitation ? (
+                <Spinner />
+              ) : (
+                precipitationData.length > 0 && renderHumidityChart()
+              )}
             </div>
             <div className="bg-white dark:bg-gray-800 p-4 rounded shadow mt-4" style={{ minHeight: '380px' }}>
               <h3 className="text-lg font-medium mb-2 text-gray-900 dark:text-white">Cloud Cover (last {numDays} days)</h3>
-              {precipitationData.length > 0 && renderCloudCoverChart()}
+              {isLoadingPrecipitation ? (
+                <Spinner />
+              ) : (
+                precipitationData.length > 0 && renderCloudCoverChart()
+              )}
             </div>
           </div>
         )}
