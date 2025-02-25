@@ -1,10 +1,11 @@
 // src/app/page.tsx
+
 'use client';
 
 import { useState } from 'react';
 import Image from 'next/image';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts';
-import { search, getWeather, getForecast, getOneCallDaySummary } from "@/lib/api";
+import { search, getWeatherAndSnow, getForecast, getOneCallDaySummary } from "@/lib/api";
 import { useTheme } from './ThemeProvider';
 
 // Default number of days
@@ -36,6 +37,10 @@ interface WeatherData {
   sys: { sunrise: number; sunset: number };
 }
 
+interface SnowDepthData {
+  depth: number | null;
+}
+
 interface PrecipitationData {
   date: string;
   precipitation: number;
@@ -46,6 +51,7 @@ interface PrecipitationData {
 interface ForecastData {
   list: { dt: number; main: { temp: number }; weather: { description: string }[] }[];
 }
+
 
 // Function to calculate distance between two lat/lon points (in kilometers)
 const getDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
@@ -64,6 +70,7 @@ export default function Home() {
   const [city, setCity] = useState('');
   const [locations, setLocations] = useState<Location[]>([]);
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
+  const [snowDepthData, setSnowDepthData] = useState<number | null>(null);
   const [forecastData, setForecastData] = useState<ForecastData | null>(null);
   const [precipitationData, setPrecipitationData] = useState<PrecipitationData[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -78,6 +85,7 @@ export default function Home() {
       setWeatherData(null);
       setForecastData(null);
       setPrecipitationData([]);
+      setSnowDepthData(null);
       setShowGraphs(false); // Reset graph visibility on new search
       setNoResults(false);
 
@@ -146,12 +154,18 @@ export default function Home() {
   // Handle location selection
   const handleLocationClick = async (location: Location) => {
     try {
-      const data = await getWeather(location.name);
-      setWeatherData(data);
-      setLocations([]);
-      setError(null);
+      const { weather, snowDepth } = await getWeatherAndSnow(location.lat, location.lon);
+      if (weather) {
+        weather.name = location.name;
+        setWeatherData(weather);
+        setSnowDepthData(snowDepth);
+        setLocations([]);
+        setError(null);
+      } else {
+        setError('Failed to fetch weather data');
+      }
     } catch {
-      setError('Failed to fetch weather data');
+      setError('Failed to fetch weather and snow data');
     }
   };
 
@@ -200,6 +214,7 @@ export default function Home() {
       setShowGraphs(false); // Hide graphs if fetch fails
     }
   };
+
 
   // Chart rendering functions
   const renderPrecipitationChart = () => (
@@ -314,6 +329,11 @@ export default function Home() {
             <p>Sunset: {new Date(weatherData.sys.sunset * 1000).toLocaleTimeString()}</p>
             <p>Humidity: {weatherData.main.humidity}%</p>
             <p>Pressure: {weatherData.main.pressure} hPa</p>
+            {snowDepthData !== null ? (
+              <p>Snow falls for today: {snowDepthData.toFixed(1)} cm</p>
+            ) : (
+              <p>Snow falls for today: No data available</p>
+            )}
           </div>
         )}
 

@@ -6,7 +6,6 @@ export interface LinkItem {
 
 export const internalLinks: LinkItem[] = [
   { label: 'Home', href: '/' },
-  { label: 'Snow Depth', href: '/snowdepth' },
 ];
 
 export const externalLinks: LinkItem[] = [
