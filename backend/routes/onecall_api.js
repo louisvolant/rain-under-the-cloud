@@ -15,6 +15,8 @@ router.get('/onecall', async (req, res) => {
         return res.status(400).json({ error: "Latitude and Longitude parameters are required" });
     }
 
+    console.log(`Fetching /onecall for lat=${lat}, lon=${lon}`);
+
     try {
         const response = await axios.get(ONECALL_V3_API, {
             params: { lat, lon, appid: API_KEY, units: 'metric', lang: 'en' }
@@ -34,6 +36,7 @@ router.get('/onecalltimemachine', async (req, res) => {
     if (!lat || !lon || !date) {
         return res.status(400).send({ error: "Latitude, Longitude and Date parameters are required" });
     }
+    console.log(`Fetching /onecalltimemachine for lat=${lat}, lon=${lon}, date=${date}`);
 
     // Convert date to Unix timestamp (assuming date is in 'YYYY-MM-DD' format)
     const timestamp = new Date(date).getTime() / 1000; // Convert to seconds
@@ -66,6 +69,8 @@ router.get('/onecalldaysummary', async (req, res) => {
     if (!lat || !lon || !date) {
         return res.status(400).send({ error: "Latitude, Longitude and Date parameters are required" });
     }
+
+    console.log(`Fetching /onecalldaysummary for lat=${lat}, lon=${lon}, date=${date}`);
 
     try {
         const response = await axios.get(ONECALL_V3_DAY_SUMMARY_API, {

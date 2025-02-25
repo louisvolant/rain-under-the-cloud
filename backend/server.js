@@ -4,17 +4,22 @@ require('dotenv').config();
 const express = require('express');
 const axios = require('axios');
 const cors = require('cors');
+const apicache = require('apicache');
 const apiRoutes = require('./routes/api');
 
 const app = express();
+
+// Initialize apicache with a 10-minute cache duration
+const cache = apicache.middleware('10 minutes');
+
 app.use(express.json());
 app.use(cors({
   origin: process.env.CORS_DEV_FRONTEND_URL_AND_PORT,
   credentials: true // Allow credentials
 }));
 
-// Routes
-app.use('/api/', apiRoutes);
+// Apply caching middleware to all /api/ routes
+app.use('/api/', cache, apiRoutes); // Add cache middleware before the routes
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
