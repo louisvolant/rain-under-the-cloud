@@ -45,7 +45,16 @@ interface PrecipitationData {
 }
 
 interface ForecastData {
-  list: { dt: number; main: { temp: number }; weather: { description: string }[] }[];
+  list: {
+    dt: number;
+    main: { temp: number };
+    weather: {
+      id: number;          // Weather condition ID (e.g., 500 for light rain)
+      main: string;        // Main weather category (e.g., "Rain")
+      description: string; // Detailed description (e.g., "light rain")
+      icon: string;        // Icon code (e.g., "10d", "10n")
+    }[];
+  }[];
 }
 
 
@@ -290,7 +299,7 @@ export default function Home() {
   );
 
   const groupForecastByDay = (forecast: ForecastData) => {
-    const grouped: { [key: string]: { dt: number; main: { temp: number }; weather: { description: string }[] }[] } = {};
+    const grouped: { [key: string]: { dt: number; main: { temp: number }; weather: { description: string , icon: string}[] }[] } = {};
     forecast.list.forEach((item) => {
       const date = new Date(item.dt * 1000).toLocaleDateString();
       if (!grouped[date]) {

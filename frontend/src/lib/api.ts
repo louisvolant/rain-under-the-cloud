@@ -63,6 +63,7 @@ export const getWeatherAndSnow = async (latitude: number, longitude: number) => 
 export const getForecast = async (latitude: string, longitude: string) => {
   const url = `/api/forecast?lat=${latitude}&lon=${longitude}`;
   const response = await api.get(url);
+  // console.log('Forecast data:', JSON.stringify(response.data, null, 2));
   return response.data;
 };
 
