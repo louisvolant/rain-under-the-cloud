@@ -376,16 +376,33 @@ export default function Home() {
               Show weather forecast
             </button>
             {forecastData && (
-              <div className="p-4 bg-green-100 dark:bg-green-900 rounded mb-4 text-gray-900 dark:text-gray-200">
-                <h2 className="text-xl mb-2">Weather Forecast</h2>
+              <div className="p-6 bg-green-50 dark:bg-green-800 rounded-lg shadow-md mb-4 text-gray-950 dark:text-gray-100">
+                <h2 className="text-2xl font-semibold mb-3">Weather Forecast</h2>
                 {Object.entries(groupForecastByDay(forecastData)).map(([date, items]) => (
-                  <div key={date} className="mb-4">
-                    <h3 className="text-lg font-medium">{date}</h3>
-                    {items.map((item, index) => (
-                      <p key={index} className="ml-4">
-                        {new Date(item.dt * 1000).getHours()}h: {item.main.temp}°C, {item.weather[0].description}
-                      </p>
-                    ))}
+                  <div key={date} className="mb-6">
+                    <h3 className="text-lg font-medium mb-2">{date}</h3>
+                    <div className="ml-4 space-y-2">
+                      {items.map((item, index) => {
+                        const description = item.weather[0].description;
+                        const iconSrc = `https://openweathermap.org/img/wn/${item.weather[0].icon}@2x.png`;
+                        return (
+                          <div key={index} className="flex items-center">
+                            <div className="flex-shrink-0 bg-white dark:bg-gray-700 rounded-full p-1 mr-3">
+                              <Image
+                                src={iconSrc}
+                                alt={description}
+                                width={40}
+                                height={40}
+                              />
+                            </div>
+                            <p className="text-base">
+                              <span className="font-medium">{new Date(item.dt * 1000).getHours()}h:</span>{' '}
+                              {item.main.temp.toFixed(1)}°C, {description}
+                            </p>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
                 ))}
               </div>

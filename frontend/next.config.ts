@@ -5,6 +5,9 @@ const nextConfig = {
   env: {
     BACKEND_URL: process.env.BACKEND_URL,
   },
+  images: {
+    domains: ['openweathermap.org'],
+  },
 }
 
 module.exports = nextConfig
