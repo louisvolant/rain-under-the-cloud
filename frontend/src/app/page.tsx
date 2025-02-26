@@ -77,71 +77,77 @@ export default function Home() {
   const { darkMode, toggleDarkMode } = useTheme();
 
   // Handle city search with filtering
-  const handleSearch = async () => {
-    try {
-      const data = await search(city);
-      setWeatherData(null);
-      setForecastData(null);
-      setPrecipitationData([]);
-      setRainFallsData(null);
-      setSnowDepthData(null);
-      setShowGraphs(false); // Reset graph visibility on new search
-      setNoResults(false);
+    const handleSearch = async () => {
+      try {
+        const data = await search(city);
+        setWeatherData(null);
+        setForecastData(null);
+        setPrecipitationData([]);
+        setRainFallsData(null);
+        setSnowDepthData(null);
+        setShowGraphs(false); // Reset graph visibility on new search
+        setNoResults(false);
 
-      if (data.length === 0) {
-        setNoResults(true);
-        setLocations([]);
-        setError(null);
-        return;
-      }
-
-      const groupedLocations: { [key: string]: Location[] } = {};
-      data.forEach((loc: Location) => {
-        const key = `${loc.name}-${loc.country}-${loc.state || ''}`;
-        if (!groupedLocations[key]) {
-          groupedLocations[key] = [];
+        if (data.length === 0) {
+          setNoResults(true);
+          setLocations([]);
+          setError(null);
+          return;
         }
-        groupedLocations[key].push(loc);
-      });
 
-      const filteredLocations = Object.values(groupedLocations).map((group) => {
-        if (group.length === 1) return group[0];
-
-        const clusters: Location[][] = [];
-        group.forEach((loc) => {
-          let added = false;
-          for (const cluster of clusters) {
-            if (
-              cluster.some(
-                (cl) => getDistance(loc.lat, loc.lon, cl.lat, cl.lon) <= 1
-              )
-            ) {
-              cluster.push(loc);
-              added = true;
-              break;
-            }
+        const groupedLocations: { [key: string]: Location[] } = {};
+        data.forEach((loc: Location) => {
+          const key = `${loc.name}-${loc.country}-${loc.state || ''}`;
+          if (!groupedLocations[key]) {
+            groupedLocations[key] = [];
           }
-          if (!added) clusters.push([loc]);
+          groupedLocations[key].push(loc);
         });
 
-        return clusters.map((cluster) =>
-          cluster.reduce((best, current) => {
-            const bestLocalNamesCount = Object.keys(best.local_names || {}).length;
-            const currentLocalNamesCount = Object.keys(current.local_names || {}).length;
-            return currentLocalNamesCount > bestLocalNamesCount ? current : best;
-          })
-        )[0];
-      });
+        const filteredLocations = Object.values(groupedLocations).map((group) => {
+          if (group.length === 1) return group[0];
 
-      setLocations(filteredLocations);
-      setError(null);
-    } catch (error) {
-      console.error('Error fetching locations:', error);
-      setError('Failed to fetch locations');
-      setLocations([]);
-      setNoResults(false);
-    }
-  };
+          const clusters: Location[][] = [];
+          group.forEach((loc) => {
+            let added = false;
+            for (const cluster of clusters) {
+              if (
+                cluster.some(
+                  (cl) => getDistance(loc.lat, loc.lon, cl.lat, cl.lon) <= 1
+                )
+              ) {
+                cluster.push(loc);
+                added = true;
+                break;
+              }
+            }
+            if (!added) clusters.push([loc]);
+          });
+
+          return clusters.map((cluster) =>
+            cluster.reduce((best, current) => {
+              const bestLocalNamesCount = Object.keys(best.local_names || {}).length;
+              const currentLocalNamesCount = Object.keys(current.local_names || {}).length;
+              return currentLocalNamesCount > bestLocalNamesCount ? current : best;
+            })
+          )[0];
+        });
+
+        // If there's exactly one result, automatically select it
+        if (filteredLocations.length === 1) {
+          handleLocationClick(filteredLocations[0]);
+        } else {
+          // Otherwise, display the list of locations
+          setLocations(filteredLocations);
+          setError(null);
+        }
+      } catch (error) {
+        console.error('Error fetching locations:', error);
+        setError('Failed to fetch locations');
+        setLocations([]);
+        setNoResults(false);
+      }
+    };
 
   // Handle Enter key press
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
