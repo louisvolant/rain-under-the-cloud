@@ -315,7 +315,7 @@ export default function Home() {
       <div className="w-full max-w-md p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center">
-            <Image src="/icon.svg" alt="Rain Under The Cloud" width={50} height={50} />
+            <Image src="/icon.png" alt="Rain Under The Cloud" width={50} height={50} />
             <h1 className="text-2xl ml-2 text-gray-900 dark:text-white">Rain Under The Cloud</h1>
           </div>
           <button
