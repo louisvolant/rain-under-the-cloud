@@ -74,6 +74,7 @@ export default function Home() {
   const [numDays, setNumDays] = useState<number | string>(DEFAULT_DAYS); // Allow string for empty state
   const [city, setCity] = useState('');
   const [locations, setLocations] = useState<Location[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
   const [rainFallsData, setRainFallsData] = useState<number | null>(null);
   const [snowDepthData, setSnowDepthData] = useState<number | null>(null);
@@ -86,23 +87,24 @@ export default function Home() {
   const { darkMode, toggleDarkMode } = useTheme();
 
   // Handle city search with filtering
-    const handleSearch = async () => {
-      try {
-        const data = await search(city);
-        setWeatherData(null);
-        setForecastData(null);
-        setPrecipitationData([]);
-        setRainFallsData(null);
-        setSnowDepthData(null);
-        setShowGraphs(false); // Reset graph visibility on new search
-        setNoResults(false);
+  const handleSearch = async () => {
+    setIsSearching(true);
+    try {
+      const data = await search(city);
+      setWeatherData(null);
+      setForecastData(null);
+      setPrecipitationData([]);
+      setRainFallsData(null);
+      setSnowDepthData(null);
+      setShowGraphs(false);
+      setNoResults(false);
 
-        if (data.length === 0) {
-          setNoResults(true);
-          setLocations([]);
-          setError(null);
-          return;
-        }
+      if (data.length === 0) {
+        setNoResults(true);
+        setLocations([]);
+        setError(null);
+        return;
+      }
 
         const groupedLocations: { [key: string]: Location[] } = {};
         data.forEach((loc: Location) => {
@@ -143,20 +145,21 @@ export default function Home() {
         });
 
         // If there's exactly one result, automatically select it
-        if (filteredLocations.length === 1) {
-          handleLocationClick(filteredLocations[0]);
-        } else {
-          // Otherwise, display the list of locations
-          setLocations(filteredLocations);
-          setError(null);
-        }
-      } catch (error) {
-        console.error('Error fetching locations:', error);
-        setError('Failed to fetch locations');
-        setLocations([]);
-        setNoResults(false);
+      if (filteredLocations.length === 1) {
+        await handleLocationClick(filteredLocations[0]); // Add await here
+      } else {
+        setLocations(filteredLocations);
+        setError(null);
       }
-    };
+    } catch (error) {
+      console.error('Error fetching locations:', error);
+      setError('Failed to fetch locations');
+      setLocations([]);
+      setNoResults(false);
+    } finally {
+      setIsSearching(false);
+    }
+  };
 
   // Handle Enter key press
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -168,6 +171,7 @@ export default function Home() {
   // Handle location selection
   const handleLocationClick = async (location: Location) => {
     try {
+      setIsSearching(true); // Show loader during location fetch
       const { weather, rainFalls, snowDepth } = await getWeatherAndSnow(location.lat, location.lon);
       if (weather) {
         weather.name = location.name;
@@ -181,6 +185,8 @@ export default function Home() {
       }
     } catch {
       setError('Failed to fetch weather and snow data');
+    } finally {
+      setIsSearching(false);
     }
   };
 
@@ -311,9 +317,9 @@ export default function Home() {
   };
 
   return (
-    <div className={`flex justify-center items-center min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-300`}>
-      <div className="w-full max-w-md p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
-        <div className="flex items-center justify-between mb-4">
+  <div className="flex justify-center items-center min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
+    <div className="w-full max-w-4xl mx-4 sm:mx-6 lg:mx-8 px-4 sm:px-6 lg:px-8 py-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
+      <div className="flex items-center justify-between mb-6">
           <div className="flex items-center">
             <Image src="/icon.png" alt="Rain Under The Cloud" width={50} height={50} />
             <h1 className="text-2xl ml-2 text-gray-900 dark:text-white">Rain Under The Cloud</h1>
@@ -335,9 +341,19 @@ export default function Home() {
         />
         <button
           onClick={handleSearch}
-          className="w-full p-2 mb-4 bg-blue-500 text-white rounded hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500"
+          disabled={isSearching}
+          className={`w-full p-2 mb-4 bg-blue-500 text-white rounded hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 flex items-center justify-center ${
+            isSearching ? 'opacity-75 cursor-not-allowed' : ''
+          }`}
         >
-          Search
+          {isSearching ? (
+            <>
+              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+              Searching...
+            </>
+          ) : (
+            'Search'
+          )}
         </button>
 
         {error && <div className="text-red-600 dark:text-red-400 mb-4">{error}</div>}
