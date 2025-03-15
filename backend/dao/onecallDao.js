@@ -1,36 +1,24 @@
 // dao/oncallDao.js
-const mongoose = require('mongoose');
+const mongoose_client = require('../config/mongoose');
 
-const MONGO_URI = "mongodb+srv://" +
-    process.env.MONGODB_ATLAS_USERNAME+ ":" +
-    process.env.MONGODB_ATLAS_PASSWORD + "@" +
-    process.env.MONGODB_ATLAS_CLUSTER_URL + "/" +
-    process.env.MONGODB_ATLAS_DB_NAME + "?retryWrites=true&w=majority&appName=" +
-    process.env.MONGODB_ATLAS_APP_NAME
-//console.log('Mongo URI:', MONGO_URI);
-
-// Connect to MongoDB using Mongoose
-mongoose.connect(MONGO_URI)
-    .then(() => console.log('MongoDB Connected'))
-    .catch(err => console.error('MongoDB Connection Error:', err));
 
 // Define Mongoose Schemas and Models
-const weatherOnCallSchema = new mongoose.Schema({
+const weatherOnCallSchema = new mongoose_client.Schema({
     latitude: Number,
     longitude: Number,
     units: String,
     lang: String,
     data: Object,
 });
-const WeatherOnCallModel = mongoose.model('WeatherOnCall', weatherOnCallSchema, 'WeatherOnCall'); //Third parameter forces the collection name.
+const WeatherOnCallModel = mongoose_client.model('WeatherOnCall', weatherOnCallSchema, 'WeatherOnCall'); //Third parameter forces the collection name.
 
-const weatherOnCallDaySummarySchema = new mongoose.Schema({
+const weatherOnCallDaySummarySchema = new mongoose_client.Schema({
     latitude: Number,
     longitude: Number,
     date: String,
     data: Object,
 });
-const WeatherOnCallDaySummaryModel = mongoose.model('WeatherOnCallDaySummary', weatherOnCallDaySummarySchema, 'WeatherOnCallDaySummary'); //Third parameter forces the collection name.
+const WeatherOnCallDaySummaryModel = mongoose_client.model('WeatherOnCallDaySummary', weatherOnCallDaySummarySchema, 'WeatherOnCallDaySummary'); //Third parameter forces the collection name.
 
 async function getWeatherOnCall(lat, lon, param_units, param_lang) {
   try {
