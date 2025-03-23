@@ -26,53 +26,52 @@ export default function LoginModal() {
   return (
     <>
       <button
-        className="btn btn-outline btn-secondary hover:bg-secondary hover:text-white transition-all duration-300"
+        className="border border-secondary text-secondary bg-transparent hover:bg-secondary hover:text-white px-4 py-2 rounded-md transition-all duration-300"
         onClick={() => setIsOpen(true)}
       >
         Login
       </button>
 
       {isOpen && (
-        <div className="modal modal-open backdrop-blur-sm">
-          <div className="modal-box bg-white dark:bg-gray-800 shadow-xl">
-            <h3 className="font-bold text-2xl text-gray-900 dark:text-white mb-4">Login</h3>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text text-gray-700 dark:text-gray-200">Username or Email</span>
+        <div className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm z-50">
+          <div className="bg-white dark:bg-gray-800 shadow-lg rounded-lg p-6 w-full max-w-md">
+            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Login</h3>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div>
+                <label className="block text-gray-700 dark:text-gray-200 mb-2">
+                  Username or Email
                 </label>
                 <input
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="input input-bordered w-full bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-secondary"
+                  className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-secondary transition-all"
                   required
                 />
               </div>
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text text-gray-700 dark:text-gray-200">Password</span>
+              <div>
+                <label className="block text-gray-700 dark:text-gray-200 mb-2">
+                  Password
                 </label>
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="input input-bordered w-full bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-secondary"
+                  className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-secondary transition-all"
                   required
                 />
               </div>
-              {error && <p className="text-error text-sm">{error}</p>}
-              <div className="modal-action flex justify-end gap-2">
+              {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+              <div className="flex justify-end gap-3 mt-6">
                 <button
                   type="submit"
-                  className="btn btn-secondary hover:bg-secondary-focus text-white"
+                  className="bg-secondary text-white hover:bg-secondary-focus px-4 py-2 rounded-md transition-all duration-300"
                 >
                   Login
                 </button>
                 <button
                   type="button"
-                  className="btn btn-ghost text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
-                  onClick={() => setIsOpen(false)}
+                  className="bg-transparent text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 px-4 py-2 rounded-md transition-all duration-300"
                 >
                   Cancel
                 </button>
