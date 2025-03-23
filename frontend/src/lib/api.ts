@@ -84,3 +84,4 @@ export const getOneCallDaySummary = async (latitude: string, longitude: string, 
   const response = await api.get(url);
   return response.data;
 };
+
