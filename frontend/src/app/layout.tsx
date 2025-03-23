@@ -6,6 +6,8 @@ import Footer from './Footer';
 import { ThemeProvider } from './ThemeProvider';
 import "./globals.css";
 import HeaderButtons from './HeaderButtons';
+import Link from 'next/link';
+import Image from 'next/image';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,9 +37,10 @@ export default function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <ThemeProvider>
           <header className="flex justify-between items-center p-4 bg-white dark:bg-gray-800 shadow-md">
-            <div className="flex items-center">
-              {/* Optional: Add logo or title here if desired */}
-            </div>
+            <Link href="/" className="flex items-center space-x-2">
+              <Image src="/icon.png" alt="Rain Under The Cloud" width={40} height={40} />
+              <h1 className="text-xl font-bold text-gray-900 dark:text-white">Rain Under The Cloud</h1>
+            </Link>
             <HeaderButtons />
           </header>
           <main className="min-h-[calc(100vh-8rem)]">{children}</main>

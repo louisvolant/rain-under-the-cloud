@@ -1,9 +1,7 @@
 // src/app/page.tsx
-
 'use client';
 
 import { useState } from 'react';
-import Image from 'next/image';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { search, getWeatherAndSnow, getForecast, getOneCallDaySummary } from "@/lib/api";
 import { useTheme } from './ThemeProvider';
@@ -49,14 +47,13 @@ interface ForecastData {
     dt: number;
     main: { temp: number };
     weather: {
-      id: number;          // Weather condition ID (e.g., 500 for light rain)
-      main: string;        // Main weather category (e.g., "Rain")
-      description: string; // Detailed description (e.g., "light rain")
-      icon: string;        // Icon code (e.g., "10d", "10n")
+      id: number;
+      main: string;
+      description: string;
+      icon: string;
     }[];
   }[];
 }
-
 
 // Function to calculate distance between two lat/lon points (in kilometers)
 const getDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
@@ -71,7 +68,7 @@ const getDistance = (lat1: number, lon1: number, lat2: number, lon2: number): nu
 };
 
 export default function Home() {
-  const [numDays, setNumDays] = useState<number | string>(DEFAULT_DAYS); // Allow string for empty state
+  const [numDays, setNumDays] = useState<number | string>(DEFAULT_DAYS);
   const [city, setCity] = useState('');
   const [locations, setLocations] = useState<Location[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -83,10 +80,9 @@ export default function Home() {
   const [isLoadingPrecipitation, setIsLoadingPrecipitation] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [noResults, setNoResults] = useState(false);
-  const [showGraphs, setShowGraphs] = useState(false); // New state for graph visibility
+  const [showGraphs, setShowGraphs] = useState(false);
   const { darkMode, toggleDarkMode } = useTheme();
 
-  // Handle city search with filtering
   const handleSearch = async () => {
     setIsSearching(true);
     try {
@@ -106,47 +102,46 @@ export default function Home() {
         return;
       }
 
-        const groupedLocations: { [key: string]: Location[] } = {};
-        data.forEach((loc: Location) => {
-          const key = `${loc.name}-${loc.country}-${loc.state || ''}`;
-          if (!groupedLocations[key]) {
-            groupedLocations[key] = [];
-          }
-          groupedLocations[key].push(loc);
-        });
+      const groupedLocations: { [key: string]: Location[] } = {};
+      data.forEach((loc: Location) => {
+        const key = `${loc.name}-${loc.country}-${loc.state || ''}`;
+        if (!groupedLocations[key]) {
+          groupedLocations[key] = [];
+        }
+        groupedLocations[key].push(loc);
+      });
 
-        const filteredLocations = Object.values(groupedLocations).map((group) => {
-          if (group.length === 1) return group[0];
+      const filteredLocations = Object.values(groupedLocations).map((group) => {
+        if (group.length === 1) return group[0];
 
-          const clusters: Location[][] = [];
-          group.forEach((loc) => {
-            let added = false;
-            for (const cluster of clusters) {
-              if (
-                cluster.some(
-                  (cl) => getDistance(loc.lat, loc.lon, cl.lat, cl.lon) <= 1
-                )
-              ) {
-                cluster.push(loc);
-                added = true;
-                break;
-              }
+        const clusters: Location[][] = [];
+        group.forEach((loc) => {
+          let added = false;
+          for (const cluster of clusters) {
+            if (
+              cluster.some(
+                (cl) => getDistance(loc.lat, loc.lon, cl.lat, cl.lon) <= 1
+              )
+            ) {
+              cluster.push(loc);
+              added = true;
+              break;
             }
-            if (!added) clusters.push([loc]);
-          });
-
-          return clusters.map((cluster) =>
-            cluster.reduce((best, current) => {
-              const bestLocalNamesCount = Object.keys(best.local_names || {}).length;
-              const currentLocalNamesCount = Object.keys(current.local_names || {}).length;
-              return currentLocalNamesCount > bestLocalNamesCount ? current : best;
-            })
-          )[0];
+          }
+          if (!added) clusters.push([loc]);
         });
 
-        // If there's exactly one result, automatically select it
+        return clusters.map((cluster) =>
+          cluster.reduce((best, current) => {
+            const bestLocalNamesCount = Object.keys(best.local_names || {}).length;
+            const currentLocalNamesCount = Object.keys(current.local_names || {}).length;
+            return currentLocalNamesCount > bestLocalNamesCount ? current : best;
+          })
+        )[0];
+      });
+
       if (filteredLocations.length === 1) {
-        await handleLocationClick(filteredLocations[0]); // Add await here
+        await handleLocationClick(filteredLocations[0]);
       } else {
         setLocations(filteredLocations);
         setError(null);
@@ -161,17 +156,15 @@ export default function Home() {
     }
   };
 
-  // Handle Enter key press
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       handleSearch();
     }
   };
 
-  // Handle location selection
   const handleLocationClick = async (location: Location) => {
     try {
-      setIsSearching(true); // Show loader during location fetch
+      setIsSearching(true);
       const { weather, rainFalls, snowDepth } = await getWeatherAndSnow(location.lat, location.lon);
       if (weather) {
         weather.name = location.name;
@@ -190,7 +183,6 @@ export default function Home() {
     }
   };
 
-  // Handle forecast display
   const handleShowForecast = async () => {
     if (!weatherData) return;
     try {
@@ -202,7 +194,6 @@ export default function Home() {
     }
   };
 
-  // Handle input change
   const handleNumDaysChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     if (value === '' || !isNaN(parseInt(value))) {
@@ -210,7 +201,6 @@ export default function Home() {
     }
   };
 
-  // Handle blur to enforce a valid number
   const handleNumDaysBlur = () => {
     const numValue = typeof numDays === 'string' ? parseInt(numDays) : numDays;
     if (numDays === '' || isNaN(numValue) || numValue < 1) {
@@ -218,53 +208,49 @@ export default function Home() {
     }
   };
 
-  // Update fetchPrecipitations to handle numDays as number
-   const fetchPrecipitations = async () => {
-     if (!weatherData) return;
-     try {
-       setIsLoadingPrecipitation(true);
-       setShowGraphs(true);
-       const precipitationDataPromises = [];
-       const today = new Date();
-       const days = typeof numDays === 'string' ? parseInt(numDays) || DEFAULT_DAYS : numDays;
+  const fetchPrecipitations = async () => {
+    if (!weatherData) return;
+    try {
+      setIsLoadingPrecipitation(true);
+      setShowGraphs(true);
+      const precipitationDataPromises = [];
+      const today = new Date();
+      const days = typeof numDays === 'string' ? parseInt(numDays) || DEFAULT_DAYS : numDays;
 
-       for (let i = 1; i <= days; i++) {
-         const date = new Date(today);
-         date.setDate(today.getDate() - i);
-         const formattedDate = date.toISOString().split('T')[0];
-         precipitationDataPromises.push(
-           getOneCallDaySummary(weatherData.coord.lat.toString(), weatherData.coord.lon.toString(), formattedDate)
-         );
-       }
+      for (let i = 1; i <= days; i++) {
+        const date = new Date(today);
+        date.setDate(today.getDate() - i);
+        const formattedDate = date.toISOString().split('T')[0];
+        precipitationDataPromises.push(
+          getOneCallDaySummary(weatherData.coord.lat.toString(), weatherData.coord.lon.toString(), formattedDate)
+        );
+      }
 
-       const responses = await Promise.all(precipitationDataPromises);
-       const transformedData = responses.map((response) => ({
-         date: new Date(response.date).toLocaleDateString(),
-         precipitation: response.precipitation?.total || 0,
-         humidity: response.humidity?.afternoon || 0,
-         cloudCover: response.cloud_cover?.afternoon || 0,
-       }));
+      const responses = await Promise.all(precipitationDataPromises);
+      const transformedData = responses.map((response) => ({
+        date: new Date(response.date).toLocaleDateString(),
+        precipitation: response.precipitation?.total || 0,
+        humidity: response.humidity?.afternoon || 0,
+        cloudCover: response.cloud_cover?.afternoon || 0,
+      }));
 
-       setPrecipitationData(transformedData.reverse());
-       setError(null);
-     } catch (error) {
-       console.error('Error fetching precipitation data:', error);
-       setError('Failed to fetch precipitation data');
-       setShowGraphs(false);
-     } finally {
-       setIsLoadingPrecipitation(false);
-     }
-   };
+      setPrecipitationData(transformedData.reverse());
+      setError(null);
+    } catch (error) {
+      console.error('Error fetching precipitation data:', error);
+      setError('Failed to fetch precipitation data');
+      setShowGraphs(false);
+    } finally {
+      setIsLoadingPrecipitation(false);
+    }
+  };
 
-    // Spinner component using Tailwind CSS
-    const Spinner = () => (
-      <div className="flex justify-center items-center h-full">
-        <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-      </div>
-    );
+  const Spinner = () => (
+    <div className="flex justify-center items-center h-full">
+      <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+    </div>
+  );
 
-
-  // Chart rendering functions
   const renderPrecipitationChart = () => (
     <ResponsiveContainer width="100%" height={300}>
       <BarChart data={precipitationData}>
@@ -305,7 +291,7 @@ export default function Home() {
   );
 
   const groupForecastByDay = (forecast: ForecastData) => {
-    const grouped: { [key: string]: { dt: number; main: { temp: number }; weather: { description: string , icon: string}[] }[] } = {};
+    const grouped: { [key: string]: { dt: number; main: { temp: number }; weather: { description: string, icon: string }[] }[] } = {};
     forecast.list.forEach((item) => {
       const date = new Date(item.dt * 1000).toLocaleDateString();
       if (!grouped[date]) {
@@ -317,13 +303,9 @@ export default function Home() {
   };
 
   return (
-  <div className="flex justify-center items-center min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
-    <div className="w-full max-w-4xl mx-4 sm:mx-6 lg:mx-8 px-4 sm:px-6 lg:px-8 py-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
-      <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center">
-            <Image src="/icon.png" alt="Rain Under The Cloud" width={50} height={50} />
-            <h1 className="text-2xl ml-2 text-gray-900 dark:text-white">Rain Under The Cloud</h1>
-          </div>
+    <div className="flex justify-center items-center min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
+      <div className="w-full max-w-4xl mx-4 sm:mx-6 lg:mx-8 px-4 sm:px-6 lg:px-8 py-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
+        <div className="flex items-center justify-end mb-6">
           <button
             onClick={toggleDarkMode}
             className="p-2 bg-gray-200 dark:bg-gray-700 rounded-full hover:bg-gray-300 dark:hover:bg-gray-600"
@@ -373,24 +355,24 @@ export default function Home() {
           </div>
         )}
 
-    {weatherData && (
-      <div className="p-4 bg-blue-100 dark:bg-blue-900 rounded mb-4 text-gray-900 dark:text-gray-200">
-        <h2 className="text-xl mb-2">Weather for {weatherData.name}</h2>
-        <p>Temperature: {weatherData.main.temp}°C</p>
-        <p>Feels like: {weatherData.main.feels_like}°C</p>
-        <p>Description: {weatherData.weather[0].description}</p>
-        <p>Wind: {weatherData.wind.speed} m/s, direction {weatherData.wind.deg}°</p>
-        <p>Clouds: {weatherData.clouds.all}%</p>
-        <p>Visibility: {weatherData.visibility != null && weatherData.visibility !== null ? `${weatherData.visibility / 1000} km` : 'No data available'}</p>
-        <p>Coordinates: Lat {weatherData.coord.lat}, Lon {weatherData.coord.lon}</p>
-        <p>Sunrise: {new Date(weatherData.sys.sunrise * 1000).toLocaleTimeString()}</p>
-        <p>Sunset: {new Date(weatherData.sys.sunset * 1000).toLocaleTimeString()}</p>
-        <p>Humidity: {weatherData.main.humidity}%</p>
-        <p>Pressure: {weatherData.main.pressure} hPa</p>
-        <p>Total rain falls for today: {rainFallsData !== null ? rainFallsData.toFixed(1) + ' mm' : 'No data available'}</p>
-        <p>Total snow falls for today: {snowDepthData !== null ? snowDepthData.toFixed(1) + ' cm' : 'No data available'}</p>
-      </div>
-    )}
+        {weatherData && (
+          <div className="p-4 bg-blue-100 dark:bg-blue-900 rounded mb-4 text-gray-900 dark:text-gray-200">
+            <h2 className="text-xl mb-2">Weather for {weatherData.name}</h2>
+            <p>Temperature: {weatherData.main.temp}°C</p>
+            <p>Feels like: {weatherData.main.feels_like}°C</p>
+            <p>Description: {weatherData.weather[0].description}</p>
+            <p>Wind: {weatherData.wind.speed} m/s, direction {weatherData.wind.deg}°</p>
+            <p>Clouds: {weatherData.clouds.all}%</p>
+            <p>Visibility: {weatherData.visibility != null && weatherData.visibility !== null ? `${weatherData.visibility / 1000} km` : 'No data available'}</p>
+            <p>Coordinates: Lat {weatherData.coord.lat}, Lon {weatherData.coord.lon}</p>
+            <p>Sunrise: {new Date(weatherData.sys.sunrise * 1000).toLocaleTimeString()}</p>
+            <p>Sunset: {new Date(weatherData.sys.sunset * 1000).toLocaleTimeString()}</p>
+            <p>Humidity: {weatherData.main.humidity}%</p>
+            <p>Pressure: {weatherData.main.pressure} hPa</p>
+            <p>Total rain falls for today: {rainFallsData !== null ? rainFallsData.toFixed(1) + ' mm' : 'No data available'}</p>
+            <p>Total snow falls for today: {snowDepthData !== null ? snowDepthData.toFixed(1) + ' cm' : 'No data available'}</p>
+          </div>
+        )}
 
         {weatherData && (
           <>
@@ -413,7 +395,7 @@ export default function Home() {
                         return (
                           <div key={index} className="flex items-center">
                             <div className="flex-shrink-0 bg-white dark:bg-gray-700 rounded-full p-1 mr-3">
-                              <Image
+                              <img
                                 src={iconSrc}
                                 alt={description}
                                 width={40}
@@ -441,22 +423,22 @@ export default function Home() {
           </>
         )}
 
-    {weatherData && (
-      <div className="mb-4">
-        <label htmlFor="numDays" className="mr-2 text-gray-900 dark:text-gray-200">
-          Number of days:
-        </label>
-        <input
-          type="number"
-          id="numDays"
-          value={numDays}
-          onChange={handleNumDaysChange}
-          onBlur={handleNumDaysBlur}
-          min="1"
-          className="border rounded p-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-      </div>
-    )}
+        {weatherData && (
+          <div className="mb-4">
+            <label htmlFor="numDays" className="mr-2 text-gray-900 dark:text-gray-200">
+              Number of days:
+            </label>
+            <input
+              type="number"
+              id="numDays"
+              value={numDays}
+              onChange={handleNumDaysChange}
+              onBlur={handleNumDaysBlur}
+              min="1"
+              className="border rounded p-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+        )}
 
         {showGraphs && (
           <div className="mt-4">
