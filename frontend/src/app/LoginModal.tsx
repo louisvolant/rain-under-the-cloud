@@ -23,6 +23,10 @@ export default function LoginModal() {
     }
   };
 
+  const handleCancel = () => {
+    setIsOpen(false);
+  };
+
   return (
     <>
       <button
@@ -65,13 +69,14 @@ export default function LoginModal() {
               <div className="flex justify-end gap-3 mt-6">
                 <button
                   type="submit"
-                  className="bg-secondary text-white hover:bg-secondary-focus px-4 py-2 rounded-md transition-all duration-300"
+                  className="bg-secondary text-white hover:bg-secondary-focus dark:bg-secondary dark:hover:bg-secondary-focus px-4 py-2 rounded-md transition-all duration-300"
                 >
                   Login
                 </button>
                 <button
                   type="button"
                   className="bg-transparent text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 px-4 py-2 rounded-md transition-all duration-300"
+                  onClick={handleCancel}
                 >
                   Cancel
                 </button>
