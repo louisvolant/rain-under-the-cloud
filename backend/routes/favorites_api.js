@@ -1,4 +1,4 @@
-//routes/favorites_api.js
+// routes/favorites_api.js
 
 const express = require('express');
 const router = express.Router();
@@ -21,7 +21,7 @@ router.get('/favorites', async (req, res) => {
  }
 
  try {
- const favorites = await Favorite.find({ user_id: req.session.user.id });
+ const favorites = await UserFavoritesModel.find({ user_id: req.session.user.id });
  res.json(favorites);
  } catch (err) {
  res.status(500).json({ error: 'Internal server error' });

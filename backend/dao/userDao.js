@@ -17,12 +17,12 @@ const passwordResetTokensSchema = new mongoose.Schema({
 });
 const UserPasswordResetTokensModel = mongoose.model('UserPasswordResetTokens', passwordResetTokensSchema, 'UserPasswordResetTokens');
 
-const favoriteSchema = new mongoose.Schema({
+const userFavoritesSchema = new mongoose.Schema({
   user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Users', required: true },
   location_name: { type: String, required: true },
   longitude: { type: Number, required: true },
   latitude: { type: Number, required: true }
 });
-const UserFavoritesModel = mongoose.model('UserFavorites', favoriteSchema, 'UserFavorites');
+const UserFavoritesModel = mongoose.model('UserFavorites', userFavoritesSchema, 'UserFavorites');
 
 module.exports = { UsersModel, UserPasswordResetTokensModel, UserFavoritesModel };

@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { search, getWeatherAndSnow, getForecast, getOneCallDaySummary } from "@/lib/api";
 import { useTheme } from './ThemeProvider';
+import Image from "next/image";
 
 // Default number of days
 const DEFAULT_DAYS = 3;
@@ -395,7 +396,7 @@ export default function Home() {
                         return (
                           <div key={index} className="flex items-center">
                             <div className="flex-shrink-0 bg-white dark:bg-gray-700 rounded-full p-1 mr-3">
-                              <img
+                              <Image
                                 src={iconSrc}
                                 alt={description}
                                 width={40}

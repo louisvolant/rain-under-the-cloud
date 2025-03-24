@@ -17,8 +17,12 @@ export default function Register() {
     try {
       await register(username, email, password);
       router.push('/account');
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Registration failed');
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('Registration failed');
+      }
     }
   };
 

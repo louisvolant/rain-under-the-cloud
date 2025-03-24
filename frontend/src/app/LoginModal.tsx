@@ -18,8 +18,12 @@ export default function LoginModal() {
       await login(username, password);
       setIsOpen(false);
       router.push('/account');
-    } catch (err) {
-      setError('Invalid credentials');
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('Invalid credentials');
+      }
     }
   };
 
