@@ -3,7 +3,7 @@ const express = require('express');
 const router = express.Router();
 const mongoose_client = require('../config/mongoose');
 const { UsersModel, UserPasswordResetTokensModel, UserFavoritesModel } = require('../dao/userDao');
-const argon2 = require('argon2');
+const { hashPasswordArgon2 } = require('../utils/PasswordUtils');
 const crypto = require('crypto');
 const winston = require('winston');
 const Mailjet = require('node-mailjet');
@@ -20,10 +20,6 @@ const mailjet = new Mailjet({
   apiKey: process.env.MAILJET_API_KEY,
   apiSecret: process.env.MAILJET_API_SECRET
 });
-
-const hashPasswordArgon2 = async (password) => {
-  return await argon2.hash(password, { type: argon2.argon2id, memoryCost: 2 ** 16, timeCost: 3, parallelism: 1 });
-};
 
 // Request password reset
 router.post('/password_reset/request', async (req, res) => {

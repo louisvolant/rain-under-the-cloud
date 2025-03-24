@@ -1,9 +1,9 @@
 // routes/registration_api.js
 const express = require('express');
 const router = express.Router();
-const argon2 = require('argon2');
 const winston = require('winston');
 const { UsersModel } = require('../dao/userDao');
+const { hashPasswordArgon2 } = require('../utils/PasswordUtils');
 
 const logger = winston.createLogger({
     level: 'info',
@@ -14,14 +14,6 @@ const logger = winston.createLogger({
     ]
 });
 
-const hashPasswordArgon2 = async (password) => {
-    return await argon2.hash(password, {
-        type: argon2.argon2id,
-        memoryCost: 2 ** 16,
-        timeCost: 3,
-        parallelism: 1
-    });
-};
 
 // Registration route
 router.post('/register', async (req, res) => {
