@@ -2,10 +2,10 @@
 import type { Metadata } from "next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Geist, Geist_Mono } from "next/font/google";
-import Footer from './Footer';
-import { ThemeProvider } from './ThemeProvider';
+import Footer from './components/Footer';
+import { ThemeProvider } from './components/ThemeProvider';
+import HeaderButtons from './components/HeaderButtons';
 import "./globals.css";
-import HeaderButtons from './HeaderButtons';
 import Link from 'next/link';
 import Image from 'next/image';
 
