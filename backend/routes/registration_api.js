@@ -47,13 +47,23 @@ router.post('/register', async (req, res) => {
   }
 
   try {
+    // Check for existing username or email (case-insensitive)
     const existingUser = await UsersModel.findOne({
-      $or: [{ username }, { email }],
+      $or: [
+        { username: { $regex: new RegExp(`^${username}$`, 'i') } },
+        { email: { $regex: new RegExp(`^${email}$`, 'i') } },
+      ],
     });
 
     if (existingUser) {
-      logger.info('User already exists', { username, email });
-      return res.status(409).json({ error: 'Username or email already exists' });
+      let errorMessage = '';
+      if (existingUser.username.toLowerCase() === username.toLowerCase()) {
+        errorMessage = 'Username already exists';
+      } else if (existingUser.email.toLowerCase() === email.toLowerCase()) {
+        errorMessage = 'Email already exists';
+      }
+      logger.info('Duplicate found', { username, email, existing: existingUser });
+      return res.status(409).json({ error: errorMessage });
     }
 
     const hashedPassword = await hashPasswordArgon2(password);

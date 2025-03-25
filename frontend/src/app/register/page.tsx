@@ -45,7 +45,6 @@ export default function Register() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validate all fields before submission
     validateUsername(username);
     validateEmail(email);
     validatePassword(password);
@@ -59,8 +58,13 @@ export default function Register() {
       await register(username, email, password);
       router.push('/account');
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
+      // Handle the error with type checking
+      if (err instanceof Error && 'response' in err) {
+        // Assuming the error has a response property from fetch
+        const fetchError = err as Error & { response?: { data?: { error?: string } } };
+        setError(fetchError.response?.data?.error || 'Registration failed');
+      } else if (err instanceof Error) {
+        setError(err.message || 'Registration failed');
       } else {
         setError('Registration failed');
       }
