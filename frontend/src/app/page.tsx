@@ -71,7 +71,7 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [noResults, setNoResults] = useState(false);
   const [showGraphs, setShowGraphs] = useState(false);
-  const { darkMode, toggleDarkMode } = useTheme();
+  const { darkMode } = useTheme();
 
   const handleSearch = async () => {
     setIsSearching(true);
@@ -295,14 +295,6 @@ export default function Home() {
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
       <div className="w-full max-w-4xl mx-4 sm:mx-6 lg:mx-8 px-4 sm:px-6 lg:px-8 py-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
-        <div className="flex items-center justify-end mb-6">
-          <button
-            onClick={toggleDarkMode}
-            className="p-2 bg-gray-200 dark:bg-gray-700 rounded-full hover:bg-gray-300 dark:hover:bg-gray-600"
-          >
-            {darkMode ? '☀️' : '🌙'}
-          </button>
-        </div>
         <input
           type="text"
           value={city}

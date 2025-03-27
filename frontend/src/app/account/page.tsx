@@ -29,7 +29,7 @@ export default function Account() {
   const [searchCity, setSearchCity] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [locations, setLocations] = useState<Location[]>([]);
-  const [refreshTrigger, setRefreshTrigger] = useState(0); // For refreshing table
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
   const router = useRouter();
 
   useEffect(() => {
@@ -87,7 +87,7 @@ export default function Account() {
           for (const cluster of clusters) {
             if (
               cluster.some(
-                (cl) => getDistance(loc.lat, loc.lon, cl.lat, cl.lon) <= 1 // Use imported getDistance
+                (cl) => getDistance(loc.lat, loc.lon, cl.lat, cl.lon) <= 1
               )
             ) {
               cluster.push(loc);
@@ -128,7 +128,7 @@ export default function Account() {
         latitude: location.lat,
         longitude: location.lon
       });
-      setRefreshTrigger(prev => prev + 1); // Trigger refresh
+      setRefreshTrigger((prev) => prev + 1);
       setLocations([]);
       setSearchCity('');
     } catch (error) {
@@ -139,7 +139,7 @@ export default function Account() {
   const handleRemoveFavorite = async (id: string) => {
     try {
       await removeFavorite(id);
-      setRefreshTrigger(prev => prev + 1); // Trigger refresh
+      setRefreshTrigger((prev) => prev + 1);
     } catch (error) {
       console.error('Error removing favorite:', error);
     }
@@ -148,37 +148,40 @@ export default function Account() {
   if (!isAuthenticated) return null;
 
   return (
-    <div className="container mx-auto p-4">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-800 dark:text-white">My Account</h1>
+    <div className="container mx-auto px-4 py-8">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">My Account</h1>
       </div>
 
       {/* Favorites List */}
-      <div className="bg-white dark:bg-gray-800 shadow-lg rounded-lg p-6 mb-6 border border-gray-200 dark:border-gray-700">
-        <h2 className="text-xl font-semibold text-blue-600 dark:text-blue-400 mb-4">My Favorite Locations</h2>
+      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md p-6 mb-8">
+        <h2 className="text-2xl font-semibold text-blue-600 dark:text-blue-400 mb-4">My Favorite Locations</h2>
         {favorites.length === 0 ? (
-          <p className="text-gray-500 dark:text-gray-400 italic">No favorites yet</p>
+          <p className="text-gray-500 dark:text-gray-400 italic text-center">No favorites yet</p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left">
+            <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-600">
-                  <th className="py-2 px-4">Location Name</th>
-                  <th className="py-2 px-4">Latitude</th>
-                  <th className="py-2 px-4">Longitude</th>
-                  <th className="py-2 px-4">Actions</th>
+                <tr className="border-b border-gray-200 dark:border-gray-700">
+                  <th className="py-3 px-4 text-gray-700 dark:text-gray-300 font-medium">Location Name</th>
+                  <th className="py-3 px-4 text-gray-700 dark:text-gray-300 font-medium">Latitude</th>
+                  <th className="py-3 px-4 text-gray-700 dark:text-gray-300 font-medium">Longitude</th>
+                  <th className="py-3 px-4 text-gray-700 dark:text-gray-300 font-medium">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {favorites.map((fav) => (
-                  <tr key={fav.id} className="text-gray-800 dark:text-gray-200 border-b border-gray-200 dark:border-gray-600">
-                    <td className="py-2 px-4">{fav.location_name}</td>
-                    <td className="py-2 px-4">{fav.latitude}</td>
-                    <td className="py-2 px-4">{fav.longitude}</td>
-                    <td className="py-2 px-4">
+                  <tr
+                    key={fav.id}
+                    className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                  >
+                    <td className="py-3 px-4 text-gray-900 dark:text-gray-100">{fav.location_name}</td>
+                    <td className="py-3 px-4 text-gray-900 dark:text-gray-100">{fav.latitude}</td>
+                    <td className="py-3 px-4 text-gray-900 dark:text-gray-100">{fav.longitude}</td>
+                    <td className="py-3 px-4">
                       <button
                         onClick={() => handleRemoveFavorite(fav.id)}
-                        className="bg-red-500 hover:bg-red-600 text-white py-1 px-3 rounded transition-colors"
+                        className="bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-3 rounded transition-colors"
                       >
                         Remove
                       </button>
@@ -192,39 +195,39 @@ export default function Account() {
       </div>
 
       {/* Add New Favorite Form */}
-      <div className="bg-white dark:bg-gray-800 shadow-lg rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-        <h2 className="text-xl font-semibold text-blue-600 dark:text-blue-400 mb-4">Add New Favorite</h2>
+      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md p-6">
+        <h2 className="text-2xl font-semibold text-blue-600 dark:text-blue-400 mb-4">Add New Favorite</h2>
         <input
           type="text"
           value={searchCity}
           onChange={(e) => setSearchCity(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Enter a city"
-          className="w-full p-2 mb-4 border rounded bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-white border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-500 dark:placeholder-gray-400"
+          className="w-full p-3 mb-4 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
         />
         <button
           onClick={handleSearch}
           disabled={isSearching}
-          className={`w-full p-2 bg-blue-500 text-white rounded hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 transition-colors ${
-            isSearching ? 'opacity-75 cursor-not-allowed' : ''
+          className={`w-full p-3 bg-blue-500 text-white rounded-md hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 font-medium transition-colors ${
+            isSearching ? 'opacity-50 cursor-not-allowed' : ''
           }`}
         >
           {isSearching ? 'Searching...' : 'Search'}
         </button>
 
         {locations.length > 0 && (
-          <div className="mt-4">
+          <div className="mt-4 space-y-2">
             {locations.map((location, index) => (
               <div
                 key={index}
-                className="flex justify-between items-center p-2 mb-2 bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                className="flex justify-between items-center p-3 bg-gray-100 dark:bg-gray-800 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
               >
-                <span className="text-gray-800 dark:text-gray-200">
+                <span className="text-gray-900 dark:text-gray-100">
                   {location.name}, {location.country} {location.state ? `(${location.state})` : ''}
                 </span>
                 <button
                   onClick={() => handleAddFavorite(location)}
-                  className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-3 rounded transition-colors"
+                  className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-1 px-3 rounded transition-colors"
                 >
                   Add
                 </button>
