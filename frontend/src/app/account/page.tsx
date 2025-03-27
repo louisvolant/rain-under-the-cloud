@@ -4,7 +4,7 @@
 import { useEffect, useState } from 'react';
 import { checkAuth } from '@/lib/login_api';
 import { getFavorites, addFavorite, removeFavorite } from '@/lib/account_api';
-import { search } from '@/lib/api';
+import { search, getDistance } from '@/lib/api';
 import { useRouter } from 'next/navigation';
 
 interface FavoriteLocation {
@@ -23,24 +23,13 @@ interface Location {
   local_names?: { [key: string]: string };
 }
 
-// Function to calculate distance between two lat/lon points (in kilometers)
-const getDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
-  const R = 6371; // Earth's radius in kilometers
-  const dLat = (lat2 - lat1) * (Math.PI / 180);
-  const dLon = (lon2 - lon1) * (Math.PI / 180);
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
-};
-
 export default function Account() {
   const [favorites, setFavorites] = useState<FavoriteLocation[]>([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [searchCity, setSearchCity] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [locations, setLocations] = useState<Location[]>([]);
+  const [refreshTrigger, setRefreshTrigger] = useState(0); // For refreshing table
   const router = useRouter();
 
   useEffect(() => {
@@ -55,6 +44,12 @@ export default function Account() {
     };
     checkAuthentication();
   }, [router]);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchFavorites();
+    }
+  }, [refreshTrigger, isAuthenticated]);
 
   const fetchFavorites = async () => {
     try {
@@ -92,7 +87,7 @@ export default function Account() {
           for (const cluster of clusters) {
             if (
               cluster.some(
-                (cl) => getDistance(loc.lat, loc.lon, cl.lat, cl.lon) <= 1
+                (cl) => getDistance(loc.lat, loc.lon, cl.lat, cl.lon) <= 1 // Use imported getDistance
               )
             ) {
               cluster.push(loc);
@@ -133,7 +128,7 @@ export default function Account() {
         latitude: location.lat,
         longitude: location.lon
       });
-      await fetchFavorites();
+      setRefreshTrigger(prev => prev + 1); // Trigger refresh
       setLocations([]);
       setSearchCity('');
     } catch (error) {
@@ -144,7 +139,7 @@ export default function Account() {
   const handleRemoveFavorite = async (id: string) => {
     try {
       await removeFavorite(id);
-      await fetchFavorites();
+      setRefreshTrigger(prev => prev + 1); // Trigger refresh
     } catch (error) {
       console.error('Error removing favorite:', error);
     }
@@ -158,89 +153,85 @@ export default function Account() {
         <h1 className="text-3xl font-bold text-gray-800 dark:text-white">My Account</h1>
       </div>
 
-      {/* Add New Favorite Form */}
-      <div className="card bg-white dark:bg-gray-800 shadow-xl mb-6 border border-gray-200 dark:border-gray-700">
-        <div className="card-body">
-          <h2 className="card-title text-xl font-semibold text-blue-600 dark:text-blue-400">Add New Favorite</h2>
-          <input
-            type="text"
-            value={searchCity}
-            onChange={(e) => setSearchCity(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Enter a city"
-            className="w-full p-2 mb-4 border rounded bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-white border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-500 dark:placeholder-gray-400"
-          />
-          <button
-            onClick={handleSearch}
-            disabled={isSearching}
-            className={`w-full p-2 bg-blue-500 text-white rounded hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 transition-colors ${
-              isSearching ? 'opacity-75 cursor-not-allowed' : ''
-            }`}
-          >
-            {isSearching ? 'Searching...' : 'Search'}
-          </button>
-
-          {locations.length > 0 && (
-            <div className="mt-4">
-              {locations.map((location, index) => (
-                <div
-                  key={index}
-                  className="flex justify-between items-center p-2 mb-2 bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-                >
-                  <span className="text-gray-800 dark:text-gray-200">
-                    {location.name}, {location.country} {location.state ? `(${location.state})` : ''}
-                  </span>
-                  <button
-                    onClick={() => handleAddFavorite(location)}
-                    className="btn btn-sm btn-primary bg-blue-500 hover:bg-blue-600 text-white"
-                  >
-                    Add
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+      {/* Favorites List */}
+      <div className="bg-white dark:bg-gray-800 shadow-lg rounded-lg p-6 mb-6 border border-gray-200 dark:border-gray-700">
+        <h2 className="text-xl font-semibold text-blue-600 dark:text-blue-400 mb-4">My Favorite Locations</h2>
+        {favorites.length === 0 ? (
+          <p className="text-gray-500 dark:text-gray-400 italic">No favorites yet</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-600">
+                  <th className="py-2 px-4">Location Name</th>
+                  <th className="py-2 px-4">Latitude</th>
+                  <th className="py-2 px-4">Longitude</th>
+                  <th className="py-2 px-4">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {favorites.map((fav) => (
+                  <tr key={fav.id} className="text-gray-800 dark:text-gray-200 border-b border-gray-200 dark:border-gray-600">
+                    <td className="py-2 px-4">{fav.location_name}</td>
+                    <td className="py-2 px-4">{fav.latitude}</td>
+                    <td className="py-2 px-4">{fav.longitude}</td>
+                    <td className="py-2 px-4">
+                      <button
+                        onClick={() => handleRemoveFavorite(fav.id)}
+                        className="bg-red-500 hover:bg-red-600 text-white py-1 px-3 rounded transition-colors"
+                      >
+                        Remove
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
-      {/* Favorites List */}
-      <div className="card bg-white dark:bg-gray-800 shadow-xl border border-gray-200 dark:border-gray-700">
-        <div className="card-body">
-          <h2 className="card-title text-xl font-semibold text-blue-600 dark:text-blue-400">My Favorite Locations</h2>
-          {favorites.length === 0 ? (
-            <p className="text-gray-500 dark:text-gray-400 italic">No favorites yet</p>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="table w-full">
-                <thead>
-                  <tr className="text-gray-700 dark:text-gray-300">
-                    <th>Location Name</th>
-                    <th>Latitude</th>
-                    <th>Longitude</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {favorites.map((fav) => (
-                    <tr key={fav.id} className="text-gray-800 dark:text-gray-200">
-                      <td>{fav.location_name}</td>
-                      <td>{fav.latitude}</td>
-                      <td>{fav.longitude}</td>
-                      <td>
-                        <button
-                          onClick={() => handleRemoveFavorite(fav.id)}
-                          className="btn btn-sm btn-error bg-red-500 hover:bg-red-600 text-white"
-                        >
-                          Remove
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
+      {/* Add New Favorite Form */}
+      <div className="bg-white dark:bg-gray-800 shadow-lg rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+        <h2 className="text-xl font-semibold text-blue-600 dark:text-blue-400 mb-4">Add New Favorite</h2>
+        <input
+          type="text"
+          value={searchCity}
+          onChange={(e) => setSearchCity(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder="Enter a city"
+          className="w-full p-2 mb-4 border rounded bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-white border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-500 dark:placeholder-gray-400"
+        />
+        <button
+          onClick={handleSearch}
+          disabled={isSearching}
+          className={`w-full p-2 bg-blue-500 text-white rounded hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 transition-colors ${
+            isSearching ? 'opacity-75 cursor-not-allowed' : ''
+          }`}
+        >
+          {isSearching ? 'Searching...' : 'Search'}
+        </button>
+
+        {locations.length > 0 && (
+          <div className="mt-4">
+            {locations.map((location, index) => (
+              <div
+                key={index}
+                className="flex justify-between items-center p-2 mb-2 bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+              >
+                <span className="text-gray-800 dark:text-gray-200">
+                  {location.name}, {location.country} {location.state ? `(${location.state})` : ''}
+                </span>
+                <button
+                  onClick={() => handleAddFavorite(location)}
+                  className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-3 rounded transition-colors"
+                >
+                  Add
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
