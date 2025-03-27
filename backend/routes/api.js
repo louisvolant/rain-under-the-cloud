@@ -12,5 +12,6 @@ router.use(require('./onecall_api'));
 router.use(require('./account_api'));
 router.use(require('./password_api'));
 router.use(require('./registration_api'));
+router.use(require('./favorites_api'));
 
 module.exports = router;
