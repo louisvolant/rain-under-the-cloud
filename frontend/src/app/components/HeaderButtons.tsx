@@ -1,30 +1,14 @@
 // src/components/HeaderButtons.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { checkAuth, logout } from '@/lib/login_api';
+import { useAuth } from '@/context/AuthContext';
 import LoginModal from './LoginModal';
 
 export default function HeaderButtons() {
   const [isOpen, setIsOpen] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const router = useRouter();
-
-  useEffect(() => {
-    const verifyAuth = async () => {
-      const authStatus = await checkAuth();
-      setIsAuthenticated(authStatus.isAuthenticated);
-    };
-    verifyAuth();
-  }, []);
-
-  const handleLogout = async () => {
-    await logout();
-    setIsAuthenticated(false);
-    router.push('/');
-  };
+  const { isAuthenticated, handleLogout } = useAuth();
 
   return (
     <>
@@ -38,9 +22,7 @@ export default function HeaderButtons() {
       ) : (
         <div className="flex items-center space-x-4">
           <Link href="/register">
-            <button
-              className="border border-primary text-primary bg-transparent hover:bg-primary hover:text-white px-4 py-2 rounded-md transition-all duration-300"
-            >
+            <button className="border border-primary text-primary bg-transparent hover:bg-primary hover:text-white px-4 py-2 rounded-md transition-all duration-300">
               Register
             </button>
           </Link>

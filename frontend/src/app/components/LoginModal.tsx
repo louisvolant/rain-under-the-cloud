@@ -4,6 +4,7 @@
 import { useState } from 'react';
 import { login } from '@/lib/login_api';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -14,6 +15,7 @@ export default function LoginModal({ isOpen, setIsOpen }: LoginModalProps) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const { setIsAuthenticated } = useAuth();
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -21,6 +23,7 @@ export default function LoginModal({ isOpen, setIsOpen }: LoginModalProps) {
     try {
       await login(username, password);
       setIsOpen(false);
+      setIsAuthenticated(true); // Update global state
       router.push('/account');
     } catch (err: unknown) {
       if (err instanceof Error) {

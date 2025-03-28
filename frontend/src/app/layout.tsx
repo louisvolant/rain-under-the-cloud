@@ -5,6 +5,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import Footer from './components/Footer';
 import { ThemeProvider } from './components/ThemeProvider';
 import HeaderButtons from './components/HeaderButtons';
+import { AuthProvider } from '@/context/AuthContext';
 import "./globals.css";
 import Link from 'next/link';
 import Image from 'next/image';
@@ -36,15 +37,17 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <ThemeProvider>
-          <header className="flex justify-between items-center p-4 bg-white dark:bg-gray-800 shadow-md">
-            <Link href="/" className="flex items-center space-x-2">
-              <Image src="/icon.png" alt="Rain Under The Cloud" width={40} height={40} />
-              <h1 className="text-xl font-bold text-gray-900 dark:text-white">Rain Under The Cloud</h1>
-            </Link>
-            <HeaderButtons />
-          </header>
-          <main className="min-h-[calc(100vh-8rem)]">{children}</main>
-          <Footer />
+          <AuthProvider>
+            <header className="flex justify-between items-center p-4 bg-white dark:bg-gray-800 shadow-md">
+              <Link href="/" className="flex items-center space-x-2">
+                <Image src="/icon.png" alt="Rain Under The Cloud" width={40} height={40} />
+                <h1 className="text-xl font-bold text-gray-900 dark:text-white">Rain Under The Cloud</h1>
+              </Link>
+              <HeaderButtons />
+            </header>
+            <main className="min-h-[calc(100vh-8rem)]">{children}</main>
+            <Footer />
+          </AuthProvider>
         </ThemeProvider>
         <SpeedInsights />
       </body>
