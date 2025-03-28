@@ -40,6 +40,9 @@ router.post('/add-favorite', async (req, res) => {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
+  // Clear the cache if you're using apicache
+  apicache.clear('/api/favorites');
+
   try {
     const newFavorite = new UserFavoritesModel({
       user_id: req.session.user.id,
@@ -66,6 +69,9 @@ router.post('/remove-favorite', async (req, res) => {
   if (!id) {
     return res.status(400).json({ error: 'Missing favorite ID' });
   }
+
+  // Clear the cache if you're using apicache
+  apicache.clear('/api/favorites');
 
   try {
     const result = await UserFavoritesModel.findOneAndDelete({

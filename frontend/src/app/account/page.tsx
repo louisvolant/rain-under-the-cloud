@@ -1,7 +1,7 @@
 // src/app/account/page.tsx
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { checkAuth } from '@/lib/login_api';
 import { getFavorites, addFavorite, removeFavorite } from '@/lib/account_api';
 import { search, getDistance } from '@/lib/api';
@@ -54,13 +54,17 @@ export default function Account() {
   const fetchFavorites = async () => {
     try {
       const data = await getFavorites();
-      setFavorites(data);
+      const uniqueFavorites = Array.from(
+        new Map(data.map((item: FavoriteLocation) => [item.id, item])).values()
+      );
+      setFavorites(uniqueFavorites);
     } catch (err) {
       console.error('Error fetching favorites:', err);
     }
   };
 
-  const handleSearch = async () => {
+  const handleSearch = useCallback(async () => {
+    if (!searchCity.trim()) return; // Avoid searching empty strings
     setIsSearching(true);
     try {
       const data = await search(searchCity);
@@ -113,13 +117,18 @@ export default function Account() {
     } finally {
       setIsSearching(false);
     }
-  };
+  }, [searchCity]); // Dependency on searchCity
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
+  // Debounce effect for automatic search
+  useEffect(() => {
+    if (!searchCity.trim()) return; // Skip if empty
+    const debounceTimer = setTimeout(() => {
       handleSearch();
-    }
-  };
+    }, 2000); // 2-second delay
+
+    // Cleanup timeout on new input or unmount
+    return () => clearTimeout(debounceTimer);
+  }, [searchCity, handleSearch]);
 
   const handleAddFavorite = async (location: Location) => {
     try {
@@ -201,7 +210,6 @@ export default function Account() {
           type="text"
           value={searchCity}
           onChange={(e) => setSearchCity(e.target.value)}
-          onKeyDown={handleKeyDown}
           placeholder="Enter a city"
           className="w-full p-3 mb-4 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
         />
@@ -217,9 +225,9 @@ export default function Account() {
 
         {locations.length > 0 && (
           <div className="mt-4 space-y-2">
-            {locations.map((location, index) => (
+            {locations.map((location) => (
               <div
-                key={index}
+                key={`${location.name}-${location.lat}-${location.lon}`}
                 className="flex justify-between items-center p-3 bg-gray-100 dark:bg-gray-800 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
               >
                 <span className="text-gray-900 dark:text-gray-100">
