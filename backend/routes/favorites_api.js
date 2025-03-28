@@ -3,6 +3,8 @@ const express = require('express');
 const router = express.Router();
 const mongoose_client = require('../config/mongoose');
 const { UserFavoritesModel } = require('../dao/userDao');
+const apicache = require('apicache');
+
 const winston = require('winston');
 const logger = winston.createLogger({
   level: 'info',
