@@ -5,23 +5,9 @@ import { useEffect, useState, useCallback } from 'react';
 import { checkAuth } from '@/lib/login_api';
 import { getFavorites, addFavorite, removeFavorite } from '@/lib/account_api';
 import { search, getDistance } from '@/lib/api';
+import { FavoriteLocation, Location } from '@/lib/types';
 import { useRouter } from 'next/navigation';
 
-interface FavoriteLocation {
-  id: string;
-  location_name: string;
-  longitude: number;
-  latitude: number;
-}
-
-interface Location {
-  name: string;
-  country: string;
-  lat: number;
-  lon: number;
-  state?: string;
-  local_names?: { [key: string]: string };
-}
 
 export default function Account() {
   const [favorites, setFavorites] = useState<FavoriteLocation[]>([]);
@@ -51,17 +37,17 @@ export default function Account() {
     }
   }, [refreshTrigger, isAuthenticated]);
 
-  const fetchFavorites = async () => {
-    try {
-      const data = await getFavorites() as FavoriteLocation[]; // Type assertion
-      const uniqueFavorites: FavoriteLocation[] = Array.from(
-        new Map(data.map((item) => [item.id, item])).values()
-      );
-      setFavorites(uniqueFavorites);
-    } catch (err) {
-      console.error('Error fetching favorites:', err);
-    }
-  };
+    const fetchFavorites = async () => {
+      try {
+        const data = await getFavorites();
+        const uniqueFavorites: FavoriteLocation[] = Array.from(
+          new Map(data.map((item) => [item.id, item])).values()
+        );
+        setFavorites(uniqueFavorites);
+      } catch (err) {
+        console.error('Error fetching favorites:', err);
+      }
+    };
 
   const handleSearch = useCallback(async () => {
     if (!searchCity.trim()) return; // Avoid searching empty strings

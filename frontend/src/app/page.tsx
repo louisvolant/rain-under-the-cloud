@@ -5,57 +5,11 @@ import { useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { search, getWeatherAndSnow, getForecast, getOneCallDaySummary, getDistance } from "@/lib/api";
 import { useTheme } from './components/ThemeProvider';
+import { Location, WeatherData, PrecipitationData, ForecastData } from '@/lib/types';
 import Image from "next/image";
 
 // Default number of days
 const DEFAULT_DAYS = 3;
-
-// Define types for weather data and location
-interface Location {
-  name: string;
-  country: string;
-  lat: number;
-  lon: number;
-  state?: string;
-  local_names?: { [key: string]: string };
-}
-
-interface WeatherData {
-  name: string;
-  main: {
-    temp: number;
-    feels_like: number;
-    humidity: number;
-    pressure: number;
-  };
-  weather: { description: string }[];
-  wind: { speed: number; deg: number };
-  clouds: { all: number };
-  visibility: number;
-  coord: { lat: number; lon: number };
-  sys: { sunrise: number; sunset: number };
-}
-
-interface PrecipitationData {
-  date: string;
-  precipitation: number;
-  humidity: number;
-  cloudCover: number;
-}
-
-interface ForecastData {
-  list: {
-    dt: number;
-    main: { temp: number };
-    weather: {
-      id: number;
-      main: string;
-      description: string;
-      icon: string;
-    }[];
-  }[];
-}
-
 
 export default function Home() {
   const [numDays, setNumDays] = useState<number | string>(DEFAULT_DAYS);

@@ -1,5 +1,6 @@
 // src/lib/account_api.ts
 import axios from 'axios';
+import { FavoriteLocation } from '@/lib/types';
 
 console.log('BACKEND_URL:', process.env.BACKEND_URL);
 
@@ -8,7 +9,7 @@ const api = axios.create({
   withCredentials: true
 });
 
-export const getFavorites = async () => {
+export async function getFavorites(): Promise<FavoriteLocation[]> {
   const response = await api.get('/api/favorites', { withCredentials: true });
   return response.data;
 };
