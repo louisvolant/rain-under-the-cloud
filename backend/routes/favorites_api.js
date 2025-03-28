@@ -42,10 +42,24 @@ router.post('/add-favorite', async (req, res) => {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
-  // Clear the cache if you're using apicache
-  apicache.clear('/api/favorites');
-
   try {
+    // Check if a favorite with the same location_name, latitude, and longitude already exists for this user
+    const existingFavorite = await UserFavoritesModel.findOne({
+      user_id: req.session.user.id,
+      location_name,
+      latitude,
+      longitude
+    });
+
+    if (existingFavorite) {
+      // If it exists, return the existing favorite without saving a new one
+      return res.status(200).json(existingFavorite);
+    }
+
+    // Clear the cache if you're using apicache
+    apicache.clear('/api/favorites');
+
+    // If no duplicate, proceed to save the new favorite
     const newFavorite = new UserFavoritesModel({
       user_id: req.session.user.id,
       location_name,

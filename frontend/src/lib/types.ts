@@ -1,10 +1,12 @@
 // src/lib/types.ts
 
 export interface FavoriteLocation {
-  id: string;
+  _id: string; // Changed from "id" to "_id"
   location_name: string;
   longitude: number;
   latitude: number;
+  user_id?: string; // Optional, since it’s in the response
+  __v?: number; // Optional, since it’s in the response
 }
 
 export interface Location {

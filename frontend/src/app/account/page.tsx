@@ -8,7 +8,6 @@ import { search, getDistance } from '@/lib/api';
 import { FavoriteLocation, Location } from '@/lib/types';
 import { useRouter } from 'next/navigation';
 
-
 export default function Account() {
   const [favorites, setFavorites] = useState<FavoriteLocation[]>([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -37,17 +36,18 @@ export default function Account() {
     }
   }, [refreshTrigger, isAuthenticated]);
 
-    const fetchFavorites = async () => {
-      try {
-        const data = await getFavorites();
-        const uniqueFavorites: FavoriteLocation[] = Array.from(
-          new Map(data.map((item) => [item.id, item])).values()
-        );
-        setFavorites(uniqueFavorites);
-      } catch (err) {
-        console.error('Error fetching favorites:', err);
-      }
-    };
+  const fetchFavorites = async () => {
+    try {
+      const data = await getFavorites();
+      // Use _id for deduplication
+      const uniqueFavorites: FavoriteLocation[] = Array.from(
+        new Map(data.map((item) => [item._id, item])).values()
+      );
+      setFavorites(uniqueFavorites);
+    } catch (err) {
+      console.error('Error fetching favorites:', err);
+    }
+  };
 
   const handleSearch = useCallback(async () => {
     if (!searchCity.trim()) return; // Avoid searching empty strings
@@ -167,7 +167,7 @@ export default function Account() {
               <tbody>
                 {favorites.map((fav) => (
                   <tr
-                    key={fav.id}
+                    key={fav._id}
                     className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                   >
                     <td className="py-3 px-4 text-gray-900 dark:text-gray-100">{fav.location_name}</td>
@@ -175,7 +175,7 @@ export default function Account() {
                     <td className="py-3 px-4 text-gray-900 dark:text-gray-100">{fav.longitude}</td>
                     <td className="py-3 px-4">
                       <button
-                        onClick={() => handleRemoveFavorite(fav.id)}
+                        onClick={() => handleRemoveFavorite(fav._id)}
                         className="bg-red-500 hover:bg-red-600 text-white font-medium py-1 px-3 rounded transition-colors"
                       >
                         Remove
