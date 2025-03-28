@@ -53,9 +53,9 @@ export default function Account() {
 
   const fetchFavorites = async () => {
     try {
-      const data = await getFavorites();
-      const uniqueFavorites = Array.from(
-        new Map(data.map((item: FavoriteLocation) => [item.id, item])).values()
+      const data = await getFavorites() as FavoriteLocation[]; // Type assertion
+      const uniqueFavorites: FavoriteLocation[] = Array.from(
+        new Map(data.map((item) => [item.id, item])).values()
       );
       setFavorites(uniqueFavorites);
     } catch (err) {
