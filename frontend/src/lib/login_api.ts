@@ -28,7 +28,7 @@ export const changePassword = async (newpassword: string) => {
 };
 
 export const checkAuth = async () => {
-  const response = await api.get('/api/check-auth', { withCredentials: true });
+  const response = await api.post('/api/check-auth', { withCredentials: true });
   return response.data;
 };
 

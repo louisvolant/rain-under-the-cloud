@@ -77,7 +77,7 @@ router.post('/changepassword', async (req, res) => {
   }
 });
 
-router.get('/check-auth', (req, res) => {
+router.post('/check-auth', (req, res) => {
   res.json({ isAuthenticated: !!req.session.user });
 });
 
