@@ -16,6 +16,7 @@ export interface Location {
   lon: number;
   state?: string;
   local_names?: { [key: string]: string };
+  location_name?: string;
 }
 
 

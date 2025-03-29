@@ -1,9 +1,9 @@
 // src/app/page.tsx
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts';
-import { search, getWeatherAndSnow, getForecast, getOneCallDaySummary, getDistance } from "@/lib/api";
+import { search, getWeatherAndSnow, getForecast, getOneCallDaySummary, getDistance, fetchCachedFavorites } from "@/lib/weather_api";
 import { useTheme } from './components/ThemeProvider';
 import { Location, WeatherData, PrecipitationData, ForecastData } from '@/lib/types';
 import Image from "next/image";
@@ -25,7 +25,16 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [noResults, setNoResults] = useState(false);
   const [showGraphs, setShowGraphs] = useState(false);
+  const [cachedFavorites, setCachedFavorites] = useState<{ location_name: string; lat: number; lon: number }[]>([]);
   const { darkMode } = useTheme();
+
+  useEffect(() => {
+    const loadCachedFavorites = async () => {
+      const favorites = await fetchCachedFavorites();
+      setCachedFavorites(favorites);
+    };
+    loadCachedFavorites();
+  }, []);
 
   const handleSearch = async () => {
     setIsSearching(true);
@@ -106,12 +115,12 @@ export default function Home() {
     }
   };
 
-  const handleLocationClick = async (location: Location) => {
+  const handleLocationClick = async (location: Partial<Location>) => {
     try {
       setIsSearching(true);
-      const { weather, rainFalls, snowDepth } = await getWeatherAndSnow(location.lat, location.lon);
+      const { weather, rainFalls, snowDepth } = await getWeatherAndSnow(location.lat!, location.lon!);
       if (weather) {
-        weather.name = location.name;
+        weather.name = location.name || location.location_name || 'Unknown Location';
         setWeatherData(weather);
         setRainFallsData(rainFalls);
         setSnowDepthData(snowDepth);
@@ -247,8 +256,26 @@ export default function Home() {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
-      <div className="w-full max-w-4xl mx-4 sm:mx-6 lg:mx-8 px-4 sm:px-6 lg:px-8 py-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
+  <div className="flex justify-center items-start min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-300 pt-16">
+    <div className="w-full max-w-4xl mx-4 sm:mx-6 lg:mx-8 px-4 sm:px-6 lg:px-8 py-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
+        {/* Display Cached Favorites */}
+        {cachedFavorites.length > 0 && (
+          <div className="mb-4">
+            <h3 className="text-lg font-medium mb-2 text-gray-900 dark:text-white">Popular Locations</h3>
+            <div className="flex flex-wrap gap-2">
+              {cachedFavorites.map((fav, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleLocationClick({ location_name: fav.location_name, lat: fav.lat, lon: fav.lon })}
+                  className="p-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+                >
+                  {fav.location_name}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         <input
           type="text"
           value={city}

@@ -4,7 +4,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { checkAuth } from '@/lib/login_api';
 import { getFavorites, addFavorite, removeFavorite } from '@/lib/account_api';
-import { search, getDistance } from '@/lib/api';
+import { search, getDistance } from '@/lib/weather_api';
 import { FavoriteLocation, Location } from '@/lib/types';
 import { useRouter } from 'next/navigation';
 

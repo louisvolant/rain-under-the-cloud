@@ -1,11 +1,10 @@
-// src/lib/api.ts
 import axios from 'axios';
 
 console.log('BACKEND_URL:', process.env.BACKEND_URL);
 
 const api = axios.create({
   baseURL: process.env.BACKEND_URL,
-  withCredentials: true
+  withCredentials: true,
 });
 
 // Function to calculate distance between two lat/lon points (in kilometers)
@@ -40,9 +39,8 @@ export const getWeatherAndSnow = async (latitude: number, longitude: number) => 
       return { weather: null, snowDepth: null };
     }
 
-    // Construct weather data similar to what /weather provides
     const weatherData = {
-      name: '', // Note: One Call doesn't provide city name, you'll need to pass it separately or fetch it differently
+      name: '',
       main: {
         temp: currentData.temp,
         feels_like: currentData.feels_like,
@@ -57,10 +55,7 @@ export const getWeatherAndSnow = async (latitude: number, longitude: number) => 
       sys: { sunrise: currentData.sunrise, sunset: currentData.sunset },
     };
 
-    // Extract rain Falls from the first day's data (in mm)
     const rainFalls = dailyData[0].rain ?? null;
-
-    // Extract snow depth from the first day's data (in mm) and convert to cm
     const snowDepthMm = dailyData[0].snow ?? null;
     const snowDepth = snowDepthMm !== null ? snowDepthMm / 10 : null;
 
@@ -74,7 +69,6 @@ export const getWeatherAndSnow = async (latitude: number, longitude: number) => 
 export const getForecast = async (latitude: string, longitude: string) => {
   const url = `/api/forecast?lat=${latitude}&lon=${longitude}`;
   const response = await api.get(url);
-  // console.log('Forecast data:', JSON.stringify(response.data, null, 2));
   return response.data;
 };
 
@@ -96,3 +90,12 @@ export const getOneCallDaySummary = async (latitude: string, longitude: string, 
   return response.data;
 };
 
+export const fetchCachedFavorites = async () => {
+  try {
+    const response = await api.get('/api/cached-favorites');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching cached favorites:', error);
+    return [];
+  }
+};
