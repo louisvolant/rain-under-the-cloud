@@ -256,8 +256,8 @@ export default function Home() {
   };
 
   return (
-  <div className="flex justify-center items-start min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-300 pt-16">
-    <div className="w-full max-w-4xl mx-4 sm:mx-6 lg:mx-8 px-4 sm:px-6 lg:px-8 py-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
+  <div className="flex justify-center items-start pt-16">
+    <div className="w-full max-w-4xl mx-4 sm:mx-6 lg:mx-8 px-4 sm:px-6 lg:px-8 py-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg mb-8">
         {/* Display Cached Favorites */}
         {cachedFavorites.length > 0 && (
           <div className="mb-4">

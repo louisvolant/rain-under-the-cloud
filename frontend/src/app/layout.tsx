@@ -35,7 +35,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen`}>
         <ThemeProvider>
           <AuthProvider>
             <header className="flex justify-between items-center p-4 bg-white dark:bg-gray-800 shadow-md">
@@ -45,7 +45,9 @@ export default function RootLayout({
               </Link>
               <HeaderButtons />
             </header>
-            <main className="min-h-[calc(100vh-8rem)]">{children}</main>
+            <main className="flex-grow bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
+              {children}
+            </main>
             <Footer />
           </AuthProvider>
         </ThemeProvider>
