@@ -9,7 +9,8 @@ router.use(require('./precipitation_api'));
 router.use(require('./onecall_api'));
 
 
-router.use(require('./account_api'));
+router.use(require('./login_api'));
+router.use(require('./google_oauth_api'));
 router.use(require('./password_api'));
 router.use(require('./registration_api'));
 router.use(require('./favorites_api'));

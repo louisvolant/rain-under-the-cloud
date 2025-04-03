@@ -19,16 +19,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const verifyAuth = async () => {
-      const authStatus = await checkAuth();
-      setIsAuthenticated(authStatus.isAuthenticated);
+      try {
+        const authStatus = await checkAuth();
+        setIsAuthenticated(authStatus.isAuthenticated);
+        if (authStatus.isAuthenticated) {
+          router.push('/account'); // Redirect to /account if authenticated
+        }
+      } catch (error) {
+        console.error('Auth check failed:', error);
+        setIsAuthenticated(false); // Reset state on error
+      }
     };
     verifyAuth();
-  }, []);
+  }, [router]);
 
   const handleLogout = async () => {
-    await logout();
-    setIsAuthenticated(false);
-    router.push('/');
+    try {
+      await logout();
+      setIsAuthenticated(false);
+      router.push('/');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
   };
 
   return (
