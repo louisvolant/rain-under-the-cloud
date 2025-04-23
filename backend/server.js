@@ -39,7 +39,7 @@ app.use(session({
   }),
   cookie: {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production', // Secure cookies in production (requires HTTPS)
+    secure: process.env.NODE_ENV === 'PRODUCTION',
     sameSite: 'Lax', // Avoid excessive browser restrictions
     maxAge: 24 * 60 * 60 * 1000 // 1 day in milliseconds (24 hours)
   }

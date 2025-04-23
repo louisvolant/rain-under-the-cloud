@@ -12,14 +12,19 @@ const api = axios.create({
 export async function getFavorites(): Promise<FavoriteLocation[]> {
   const response = await api.get('/api/favorites', { withCredentials: true });
   return response.data;
-};
+}
 
 export const addFavorite = async (location: { location_name: string; latitude: number; longitude: number }) => {
   const response = await api.post('/api/add-favorite', location, { withCredentials: true });
   return response.data;
-};
+}
 
 export const removeFavorite = async (id: string) => {
   const response = await api.post('/api/remove-favorite', { id }, { withCredentials: true });
   return response.data;
-};
+}
+
+export const deleteAccount = async () => {
+  const response = await api.post('/api/delete_my_account', {}, { withCredentials: true });
+  return response.data;
+}

@@ -3,7 +3,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { checkAuth } from '@/lib/login_api';
-import { getFavorites, addFavorite, removeFavorite } from '@/lib/account_api';
+import { getFavorites, addFavorite, removeFavorite, deleteAccount } from '@/lib/account_api';
 import { search, getDistance } from '@/lib/weather_api';
 import { FavoriteLocation, Location } from '@/lib/types';
 import { useRouter } from 'next/navigation';
@@ -39,7 +39,6 @@ export default function Account() {
   const fetchFavorites = async () => {
     try {
       const data = await getFavorites();
-      // Use _id for deduplication
       const uniqueFavorites: FavoriteLocation[] = Array.from(
         new Map(data.map((item) => [item._id, item])).values()
       );
@@ -50,7 +49,7 @@ export default function Account() {
   };
 
   const handleSearch = useCallback(async () => {
-    if (!searchCity.trim()) return; // Avoid searching empty strings
+    if (!searchCity.trim()) return;
     setIsSearching(true);
     try {
       const data = await search(searchCity);
@@ -103,16 +102,14 @@ export default function Account() {
     } finally {
       setIsSearching(false);
     }
-  }, [searchCity]); // Dependency on searchCity
+  }, [searchCity]);
 
-  // Debounce effect for automatic search
   useEffect(() => {
-    if (!searchCity.trim()) return; // Skip if empty
+    if (!searchCity.trim()) return;
     const debounceTimer = setTimeout(() => {
       handleSearch();
-    }, 2000); // 2-second delay
+    }, 2000);
 
-    // Cleanup timeout on new input or unmount
     return () => clearTimeout(debounceTimer);
   }, [searchCity, handleSearch]);
 
@@ -137,6 +134,20 @@ export default function Account() {
       setRefreshTrigger((prev) => prev + 1);
     } catch (error) {
       console.error('Error removing favorite:', error);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      await deleteAccount();
+      router.push('/'); // Redirect to home page after deletion
+    } catch (error) {
+      console.error('Error deleting account:', error);
+      alert('Failed to delete account. Please try again.');
     }
   };
 
@@ -190,7 +201,7 @@ export default function Account() {
       </div>
 
       {/* Add New Favorite Form */}
-      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md p-6">
+      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md p-6 mb-8">
         <h2 className="text-2xl font-semibold text-blue-600 dark:text-blue-400 mb-4">Add New Favorite</h2>
         <input
           type="text"
@@ -229,6 +240,16 @@ export default function Account() {
             ))}
           </div>
         )}
+      </div>
+
+      {/* Delete Account Button */}
+      <div className="flex justify-center">
+        <button
+          onClick={handleDeleteAccount}
+          className="bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-6 rounded transition-colors"
+        >
+          Delete My Account
+        </button>
       </div>
     </div>
   );
