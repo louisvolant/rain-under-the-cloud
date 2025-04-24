@@ -1,3 +1,4 @@
+// tailwind.config.ts
 import type { Config } from "tailwindcss";
 
 export default {
@@ -7,18 +8,27 @@ export default {
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
-    theme: {
-      extend: {
-        colors: {
-          background: "var(--background)",
-          foreground: "var(--foreground)",
-          primary: "#3B82F6", // Blue-500
-          "primary-focus": "#2563EB", // Blue-600
-          secondary: "#8B5CF6", // Purple-500
-          "secondary-focus": "#7C3AED", // Purple-600
+  theme: {
+    extend: {
+      animation: {
+        'fade-in': 'fadeIn 0.5s ease-in-out',
+      },
+      keyframes: {
+        fadeIn: {
+          '0%': { opacity: '0', transform: 'translateY(10px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
         },
-       spacing: {
-         'container': 'max-width: 80rem',
+      },
+      colors: {
+        background: "var(--background)",
+        foreground: "var(--foreground)",
+        primary: "#3B82F6", // Blue-500
+        "primary-focus": "#2563EB", // Blue-600
+        secondary: "#8B5CF6", // Purple-500
+        "secondary-focus": "#7C3AED", // Purple-600
+      },
+      spacing: {
+        'container': 'max-width: 80rem',
       },
     },
   },
