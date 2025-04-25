@@ -22,13 +22,19 @@ router.post('/login', async (req, res) => {
     const user = await UsersModel.findOne(isEmail ? { email: username } : { username });
 
     if (!user || !(await verifyPassword(password, user.hashed_password))) {
+      logger.info('Login failed: Invalid credentials', { username });
       return res.status(401).json({ success: false, error: 'Invalid credentials' });
     }
 
     req.session.user = { id: user._id, username: user.username };
+    logger.info('Session set:', { sessionId: req.sessionID, userId: user._id });
     return res.json({ success: true });
   } catch (err) {
-    logger.error('Login error:', err);
+    logger.error('Login error:', {
+      message: err.message,
+      stack: err.stack,
+      username,
+    });
     return res.status(500).json({ success: false, error: 'Internal server error' });
   }
 });
