@@ -2,14 +2,15 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { search, getWeatherAndSnow, getForecast, getOneCallDaySummary, getDistance, fetchCachedFavorites } from "@/lib/weather_api";
 import { useTheme } from './components/ThemeProvider';
 import { Location, WeatherData, PrecipitationData, ForecastData } from '@/lib/types';
-import Image from "next/image";
+import WeatherDisplay from './components/WeatherDisplay';
+import ForecastDisplay from './components/ForecastDisplay';
+import GraphsDisplay from './components/GraphsDisplay';
 
-// Default number of days
 const DEFAULT_DAYS = 3;
+const LOCAL_STORAGE_KEY = 'cachedFavorites';
 
 export default function Home() {
   const [numDays, setNumDays] = useState<number | string>(DEFAULT_DAYS);
@@ -29,9 +30,22 @@ export default function Home() {
   const { darkMode } = useTheme();
 
   useEffect(() => {
+    // Load from localStorage first
+    const storedFavorites = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (storedFavorites) {
+      setCachedFavorites(JSON.parse(storedFavorites));
+    }
+
+    // Then fetch from backend
     const loadCachedFavorites = async () => {
-      const favorites = await fetchCachedFavorites();
-      setCachedFavorites(favorites);
+      try {
+        const favorites = await fetchCachedFavorites();
+        setCachedFavorites(favorites);
+        // Update localStorage with fresh data
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(favorites));
+      } catch (error) {
+        console.error('Error fetching cached favorites:', error);
+      }
     };
     loadCachedFavorites();
   }, []);
@@ -198,66 +212,9 @@ export default function Home() {
     }
   };
 
-  const Spinner = () => (
-    <div className="flex justify-center items-center h-full">
-      <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-    </div>
-  );
-
-  const renderPrecipitationChart = () => (
-    <ResponsiveContainer width="100%" height={300}>
-      <BarChart data={precipitationData}>
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="date" />
-        <YAxis />
-        <Tooltip />
-        <Legend />
-        <Bar dataKey="precipitation" fill={darkMode ? "#a3bffa" : "#8884d8"} name="Precipitation (mm)" />
-      </BarChart>
-    </ResponsiveContainer>
-  );
-
-  const renderHumidityChart = () => (
-    <ResponsiveContainer width="100%" height={300}>
-      <LineChart data={precipitationData}>
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="date" />
-        <YAxis />
-        <Tooltip />
-        <Legend />
-        <Line type="monotone" dataKey="humidity" stroke={darkMode ? "#a3bffa" : "#82ca9d"} name="Humidity (%)" />
-      </LineChart>
-    </ResponsiveContainer>
-  );
-
-  const renderCloudCoverChart = () => (
-    <ResponsiveContainer width="100%" height={300}>
-      <LineChart data={precipitationData}>
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="date" />
-        <YAxis />
-        <Tooltip />
-        <Legend />
-        <Line type="monotone" dataKey="cloudCover" stroke={darkMode ? "#a3bffa" : "#ff7300"} name="Cloud Cover (%)" />
-      </LineChart>
-    </ResponsiveContainer>
-  );
-
-  const groupForecastByDay = (forecast: ForecastData) => {
-    const grouped: { [key: string]: { dt: number; main: { temp: number }; weather: { description: string, icon: string }[] }[] } = {};
-    forecast.list.forEach((item) => {
-      const date = new Date(item.dt * 1000).toLocaleDateString();
-      if (!grouped[date]) {
-        grouped[date] = [];
-      }
-      grouped[date].push(item);
-    });
-    return grouped;
-  };
-
   return (
-  <div className="flex justify-center items-start pt-16">
-    <div className="w-full max-w-4xl mx-4 sm:mx-6 lg:mx-8 px-4 sm:px-6 lg:px-8 py-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg mb-8">
+    <div className="flex justify-center items-start pt-16">
+      <div className="w-full max-w-4xl mx-4 sm:mx-6 lg:mx-8 px-4 sm:px-6 lg:px-8 py-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg mb-8">
         {/* Display Cached Favorites */}
         {cachedFavorites.length > 0 && (
           <div className="mb-4">
@@ -318,24 +275,7 @@ export default function Home() {
           </div>
         )}
 
-        {weatherData && (
-          <div className="p-4 bg-blue-100 dark:bg-blue-900 rounded mb-4 text-gray-900 dark:text-gray-200">
-            <h2 className="text-xl mb-2">Weather for {weatherData.name}</h2>
-            <p>Temperature: {weatherData.main.temp}°C</p>
-            <p>Feels like: {weatherData.main.feels_like}°C</p>
-            <p>Description: {weatherData.weather[0].description}</p>
-            <p>Wind: {weatherData.wind.speed} m/s, direction {weatherData.wind.deg}°</p>
-            <p>Clouds: {weatherData.clouds.all}%</p>
-            <p>Visibility: {weatherData.visibility != null && weatherData.visibility !== null ? `${weatherData.visibility / 1000} km` : 'No data available'}</p>
-            <p>Coordinates: Lat {weatherData.coord.lat}, Lon {weatherData.coord.lon}</p>
-            <p>Sunrise: {new Date(weatherData.sys.sunrise * 1000).toLocaleTimeString()}</p>
-            <p>Sunset: {new Date(weatherData.sys.sunset * 1000).toLocaleTimeString()}</p>
-            <p>Humidity: {weatherData.main.humidity}%</p>
-            <p>Pressure: {weatherData.main.pressure} hPa</p>
-            <p>Total rain falls for today: {rainFallsData !== null ? rainFallsData.toFixed(1) + ' mm' : 'No data available'}</p>
-            <p>Total snow falls for today: {snowDepthData !== null ? snowDepthData.toFixed(1) + ' cm' : 'No data available'}</p>
-          </div>
-        )}
+        <WeatherDisplay weatherData={weatherData} rainFallsData={rainFallsData} snowDepthData={snowDepthData} />
 
         {weatherData && (
           <>
@@ -345,38 +285,7 @@ export default function Home() {
             >
               Show weather forecast
             </button>
-            {forecastData && (
-              <div className="p-6 bg-green-50 dark:bg-green-800 rounded-lg shadow-md mb-4 text-gray-950 dark:text-gray-100">
-                <h2 className="text-2xl font-semibold mb-3">Weather Forecast</h2>
-                {Object.entries(groupForecastByDay(forecastData)).map(([date, items]) => (
-                  <div key={date} className="mb-6">
-                    <h3 className="text-lg font-medium mb-2">{date}</h3>
-                    <div className="ml-4 space-y-2">
-                      {items.map((item, index) => {
-                        const description = item.weather[0].description;
-                        const iconSrc = `https://openweathermap.org/img/wn/${item.weather[0].icon}@2x.png`;
-                        return (
-                          <div key={index} className="flex items-center">
-                            <div className="flex-shrink-0 bg-white dark:bg-gray-700 rounded-full p-1 mr-3">
-                              <Image
-                                src={iconSrc}
-                                alt={description}
-                                width={40}
-                                height={40}
-                              />
-                            </div>
-                            <p className="text-base">
-                              <span className="font-medium">{new Date(item.dt * 1000).getHours()}h:</span>{' '}
-                              {item.main.temp.toFixed(1)}°C, {description}
-                            </p>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+            <ForecastDisplay forecastData={forecastData} />
             <button
               onClick={fetchPrecipitations}
               className="w-full p-2 mb-4 bg-blue-500 text-white rounded hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500"
@@ -404,32 +313,11 @@ export default function Home() {
         )}
 
         {showGraphs && (
-          <div className="mt-4">
-            <div className="bg-white dark:bg-gray-800 p-4 rounded shadow" style={{ minHeight: '380px' }}>
-              <h3 className="text-lg font-medium mb-2 text-gray-900 dark:text-white">Precipitation (last {numDays} days)</h3>
-              {isLoadingPrecipitation ? (
-                <Spinner />
-              ) : (
-                precipitationData.length > 0 && renderPrecipitationChart()
-              )}
-            </div>
-            <div className="bg-white dark:bg-gray-800 p-4 rounded shadow mt-4" style={{ minHeight: '380px' }}>
-              <h3 className="text-lg font-medium mb-2 text-gray-900 dark:text-white">Humidity (last {numDays} days)</h3>
-              {isLoadingPrecipitation ? (
-                <Spinner />
-              ) : (
-                precipitationData.length > 0 && renderHumidityChart()
-              )}
-            </div>
-            <div className="bg-white dark:bg-gray-800 p-4 rounded shadow mt-4" style={{ minHeight: '380px' }}>
-              <h3 className="text-lg font-medium mb-2 text-gray-900 dark:text-white">Cloud Cover (last {numDays} days)</h3>
-              {isLoadingPrecipitation ? (
-                <Spinner />
-              ) : (
-                precipitationData.length > 0 && renderCloudCoverChart()
-              )}
-            </div>
-          </div>
+          <GraphsDisplay
+            precipitationData={precipitationData}
+            isLoadingPrecipitation={isLoadingPrecipitation}
+            numDays={numDays}
+          />
         )}
       </div>
     </div>
