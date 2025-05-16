@@ -22,16 +22,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         const authStatus = await checkAuth();
         setIsAuthenticated(authStatus.isAuthenticated);
-        if (authStatus.isAuthenticated) {
-          router.push('/account'); // Redirect to /account if authenticated
-        }
       } catch (error) {
         console.error('Auth check failed:', error);
-        setIsAuthenticated(false); // Reset state on error
+        setIsAuthenticated(false);
       }
     };
     verifyAuth();
-  }, [router]);
+  }, []);
 
   const handleLogout = async () => {
     try {
