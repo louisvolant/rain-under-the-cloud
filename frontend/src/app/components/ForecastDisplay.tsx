@@ -43,7 +43,7 @@ export default function ForecastDisplay({ weatherData, forecastData, setForecast
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
 
-    const currentHour = currentDate.getHours(); // 18:24 PM CEST = 18
+    const currentHour = currentDate.getHours(); // 18:30 PM CEST = 18
 
     if (forecastDate.getTime() === today.getTime()) {
       return currentHour >= 18 ? 'Tonight' : 'This afternoon';
@@ -57,7 +57,7 @@ export default function ForecastDisplay({ weatherData, forecastData, setForecast
   };
 
   const groupForecastByDay = (forecast: ForecastData) => {
-    const currentDate = new Date('2025-05-18T18:24:00+02:00'); // Current time: 06:24 PM CEST, May 18, 2025
+    const currentDate = new Date('2025-05-18T18:30:00+02:00'); // Current time: 06:30 PM CEST, May 18, 2025
     const grouped: { [key: string]: { dt: number; main: { temp: number }; weather: { description: string; icon: string }[] }[] } = {};
     const dateLabels: { [key: string]: string } = {};
 
@@ -78,7 +78,7 @@ export default function ForecastDisplay({ weatherData, forecastData, setForecast
     <div className="mb-4">
       <button
         onClick={handleShowForecast}
-        className={`w-full p-2 mb-4 bg-green-500 text-white rounded hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-500 ${
+        className={`w-full p-2 mb-4 bg-green-500 text-white rounded hover:bg-green-700 dark:bg-green-600 dark:hover:bg-blue-500 ${
           !weatherData ? 'opacity-75 cursor-not-allowed' : ''
         }`}
         disabled={!weatherData}
@@ -96,23 +96,23 @@ export default function ForecastDisplay({ weatherData, forecastData, setForecast
                 <div key={dateKey} className="flex flex-col">
                   <h3 className="text-lg font-medium mb-2">{dateLabels[dateKey]}</h3>
                   <div className="overflow-x-auto scroll-smooth">
-                    <div className="flex flex-row gap-4">
+                    <div className="flex flex-row gap-2">
                       {items.map((item, index) => {
                         const description = item.weather[0].description;
                         const iconSrc = `https://openweathermap.org/img/wn/${item.weather[0].icon}@2x.png`;
                         return (
                           <div
                             key={index}
-                            className={`flex flex-col items-center min-w-[120px] p-2 border-r last:border-r-0 ${
+                            className={`flex flex-col items-center min-w-[100px] p-1 border-r-[0.5px] last:border-r-0 ${
                               darkMode ? 'border-gray-600' : 'border-gray-300'
                             }`}
                           >
-                            <span className="text-sm font-medium mb-2">{new Date(item.dt * 1000).getHours()}h</span>
-                            <div className={`flex-shrink-0 rounded-full p-1 mb-2 ${darkMode ? 'bg-gray-700' : 'bg-white'}`}>
-                              <Image src={iconSrc} alt={description} width={40} height={40} />
+                            <span className="text-xs font-medium mb-1">{new Date(item.dt * 1000).getHours()}h</span>
+                            <div className={`flex-shrink-0 rounded-full p-1 mb-1 ${darkMode ? 'bg-gray-700' : 'bg-white'}`}>
+                              <Image src={iconSrc} alt={description} width={36} height={36} />
                             </div>
-                            <span className="text-sm font-medium mb-2">{item.main.temp.toFixed(1)}°C</span>
-                            <span className="text-xs text-center capitalize">{description}</span>
+                            <span className="text-xs font-medium mb-1">{item.main.temp.toFixed(1)}°C</span>
+                            <span className="text-[10px] text-center capitalize">{description}</span>
                           </div>
                         );
                       })}
