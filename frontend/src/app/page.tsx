@@ -3,7 +3,6 @@
 
 import { useState, useEffect } from 'react';
 import { search, getWeatherAndSnow, getDistance, fetchCachedFavorites } from "@/lib/weather_api";
-import { useTheme } from './components/ThemeProvider';
 import { Location, WeatherData, PrecipitationData, ForecastData } from '@/lib/types';
 import WeatherDisplay from './components/WeatherDisplay';
 import ForecastDisplay from './components/ForecastDisplay';
@@ -27,7 +26,6 @@ export default function Home() {
   const [noResults, setNoResults] = useState(false);
   const [showGraphs, setShowGraphs] = useState(false);
   const [cachedFavorites, setCachedFavorites] = useState<{ location_name: string; lat: number; lon: number }[]>([]);
-  const { darkMode } = useTheme();
 
   useEffect(() => {
     const storedFavorites = localStorage.getItem(LOCAL_STORAGE_KEY);
