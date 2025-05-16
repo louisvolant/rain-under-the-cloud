@@ -1,18 +1,91 @@
 // src/components/GraphsDisplay.tsx
 'use client';
 
+import { ChangeEvent } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts';
-import { PrecipitationData } from '@/lib/types';
+import { PrecipitationData, WeatherData } from '@/lib/types';
 import { useTheme } from './ThemeProvider';
+import { getOneCallDaySummary } from '@/lib/weather_api';
 
 interface GraphsDisplayProps {
+  weatherData: WeatherData | null;
   precipitationData: PrecipitationData[];
+  setPrecipitationData: (data: PrecipitationData[]) => void;
   isLoadingPrecipitation: boolean;
+  setIsLoadingPrecipitation: (loading: boolean) => void;
+  showGraphs: boolean;
+  setShowGraphs: (show: boolean) => void;
   numDays: number | string;
+  setNumDays: (days: number | string) => void;
+  setError: (error: string | null) => void;
+  defaultDays: number;
 }
 
-export default function GraphsDisplay({ precipitationData, isLoadingPrecipitation, numDays }: GraphsDisplayProps) {
+export default function GraphsDisplay({
+  weatherData,
+  precipitationData,
+  setPrecipitationData,
+  isLoadingPrecipitation,
+  setIsLoadingPrecipitation,
+  showGraphs,
+  setShowGraphs,
+  numDays,
+  setNumDays,
+  setError,
+  defaultDays,
+}: GraphsDisplayProps) {
   const { darkMode } = useTheme();
+
+  const handleNumDaysChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value === '' || !isNaN(parseInt(value))) {
+      setNumDays(value === '' ? '' : parseInt(value));
+    }
+  };
+
+  const handleNumDaysBlur = () => {
+    const numValue = typeof numDays === 'string' ? parseInt(numDays) : numDays;
+    if (numDays === '' || isNaN(numValue) || numValue < 1) {
+      setNumDays(defaultDays);
+    }
+  };
+
+  const fetchPrecipitations = async () => {
+    if (!weatherData) return;
+    try {
+      setIsLoadingPrecipitation(true);
+      setShowGraphs(true);
+      const precipitationDataPromises = [];
+      const today = new Date();
+      const days = typeof numDays === 'string' ? parseInt(numDays) || defaultDays : numDays;
+
+      for (let i = 1; i <= days; i++) {
+        const date = new Date(today);
+        date.setDate(today.getDate() - i);
+        const formattedDate = date.toISOString().split('T')[0];
+        precipitationDataPromises.push(
+          getOneCallDaySummary(weatherData.coord.lat.toString(), weatherData.coord.lon.toString(), formattedDate)
+        );
+      }
+
+      const responses = await Promise.all(precipitationDataPromises);
+      const transformedData = responses.map((response) => ({
+        date: new Date(response.date).toLocaleDateString(),
+        precipitation: response.precipitation?.total || 0,
+        humidity: response.humidity?.afternoon || 0,
+        cloudCover: response.cloud_cover?.afternoon || 0,
+      }));
+
+      setPrecipitationData(transformedData.reverse());
+      setError(null);
+    } catch (error) {
+      console.error('Error fetching precipitation data:', error);
+      setError('Failed to fetch precipitation data');
+      setShowGraphs(false);
+    } finally {
+      setIsLoadingPrecipitation(false);
+    }
+  };
 
   const Spinner = () => (
     <div className="flex justify-center items-center h-full">
@@ -61,18 +134,46 @@ export default function GraphsDisplay({ precipitationData, isLoadingPrecipitatio
 
   return (
     <div className="mt-4">
-      <div className={`bg-white dark:bg-gray-800 p-4 rounded shadow ${darkMode ? 'text-white' : 'text-gray-900'}`} style={{ minHeight: '380px' }}>
-        <h3 className="text-lg font-medium mb-2">Precipitation (last {numDays} days)</h3>
-        {isLoadingPrecipitation ? <Spinner /> : precipitationData.length > 0 && renderPrecipitationChart()}
+      <div className="mb-4">
+        <label htmlFor="numDays" className="mr-2 text-gray-900 dark:text-gray-200">
+          Number of days:
+        </label>
+        <input
+          type="number"
+          id="numDays"
+          value={numDays}
+          onChange={handleNumDaysChange}
+          onBlur={handleNumDaysBlur}
+          min="1"
+          className="border rounded p-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
       </div>
-      <div className={`bg-white dark:bg-gray-800 p-4 rounded shadow mt-4 ${darkMode ? 'text-white' : 'text-gray-900'}`} style={{ minHeight: '380px' }}>
-        <h3 className="text-lg font-medium mb-2">Humidity (last {numDays} days)</h3>
-        {isLoadingPrecipitation ? <Spinner /> : precipitationData.length > 0 && renderHumidityChart()}
-      </div>
-      <div className={`bg-white dark:bg-gray-800 p-4 rounded shadow mt-4 ${darkMode ? 'text-white' : 'text-gray-900'}`} style={{ minHeight: '380px' }}>
-        <h3 className="text-lg font-medium mb-2">Cloud Cover (last {numDays} days)</h3>
-        {isLoadingPrecipitation ? <Spinner /> : precipitationData.length > 0 && renderCloudCoverChart()}
-      </div>
+      <button
+        onClick={fetchPrecipitations}
+        className={`w-full p-2 mb-4 bg-blue-500 text-white rounded hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 ${
+          !weatherData ? 'opacity-75 cursor-not-allowed' : ''
+        }`}
+        disabled={!weatherData}
+      >
+        View last {numDays} days of precipitation
+      </button>
+
+      {showGraphs && (
+        <div>
+          <div className={`bg-white dark:bg-gray-800 p-4 rounded shadow ${darkMode ? 'text-white' : 'text-gray-900'}`} style={{ minHeight: '380px' }}>
+            <h3 className="text-lg font-medium mb-2">Precipitation (last {numDays} days)</h3>
+            {isLoadingPrecipitation ? <Spinner /> : precipitationData.length > 0 && renderPrecipitationChart()}
+          </div>
+          <div className={`bg-white dark:bg-gray-800 p-4 rounded shadow mt-4 ${darkMode ? 'text-white' : 'text-gray-900'}`} style={{ minHeight: '380px' }}>
+            <h3 className="text-lg font-medium mb-2">Humidity (last {numDays} days)</h3>
+            {isLoadingPrecipitation ? <Spinner /> : precipitationData.length > 0 && renderHumidityChart()}
+          </div>
+          <div className={`bg-white dark:bg-gray-800 p-4 rounded shadow mt-4 ${darkMode ? 'text-white' : 'text-gray-900'}`} style={{ minHeight: '380px' }}>
+            <h3 className="text-lg font-medium mb-2">Cloud Cover (last {numDays} days)</h3>
+            {isLoadingPrecipitation ? <Spinner /> : precipitationData.length > 0 && renderCloudCoverChart()}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

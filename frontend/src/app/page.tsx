@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { search, getWeatherAndSnow, getForecast, getOneCallDaySummary, getDistance, fetchCachedFavorites } from "@/lib/weather_api";
+import { search, getWeatherAndSnow, getDistance, fetchCachedFavorites } from "@/lib/weather_api";
 import { useTheme } from './components/ThemeProvider';
 import { Location, WeatherData, PrecipitationData, ForecastData } from '@/lib/types';
 import WeatherDisplay from './components/WeatherDisplay';
@@ -30,18 +30,15 @@ export default function Home() {
   const { darkMode } = useTheme();
 
   useEffect(() => {
-    // Load from localStorage first
     const storedFavorites = localStorage.getItem(LOCAL_STORAGE_KEY);
     if (storedFavorites) {
       setCachedFavorites(JSON.parse(storedFavorites));
     }
 
-    // Then fetch from backend
     const loadCachedFavorites = async () => {
       try {
         const favorites = await fetchCachedFavorites();
         setCachedFavorites(favorites);
-        // Update localStorage with fresh data
         localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(favorites));
       } catch (error) {
         console.error('Error fetching cached favorites:', error);
@@ -150,72 +147,9 @@ export default function Home() {
     }
   };
 
-  const handleShowForecast = async () => {
-    if (!weatherData) return;
-    try {
-      const data = await getForecast(weatherData.coord.lat.toString(), weatherData.coord.lon.toString());
-      setForecastData(data);
-      setError(null);
-    } catch {
-      setError('Failed to fetch forecast');
-    }
-  };
-
-  const handleNumDaysChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    if (value === '' || !isNaN(parseInt(value))) {
-      setNumDays(value === '' ? '' : parseInt(value));
-    }
-  };
-
-  const handleNumDaysBlur = () => {
-    const numValue = typeof numDays === 'string' ? parseInt(numDays) : numDays;
-    if (numDays === '' || isNaN(numValue) || numValue < 1) {
-      setNumDays(DEFAULT_DAYS);
-    }
-  };
-
-  const fetchPrecipitations = async () => {
-    if (!weatherData) return;
-    try {
-      setIsLoadingPrecipitation(true);
-      setShowGraphs(true);
-      const precipitationDataPromises = [];
-      const today = new Date();
-      const days = typeof numDays === 'string' ? parseInt(numDays) || DEFAULT_DAYS : numDays;
-
-      for (let i = 1; i <= days; i++) {
-        const date = new Date(today);
-        date.setDate(today.getDate() - i);
-        const formattedDate = date.toISOString().split('T')[0];
-        precipitationDataPromises.push(
-          getOneCallDaySummary(weatherData.coord.lat.toString(), weatherData.coord.lon.toString(), formattedDate)
-        );
-      }
-
-      const responses = await Promise.all(precipitationDataPromises);
-      const transformedData = responses.map((response) => ({
-        date: new Date(response.date).toLocaleDateString(),
-        precipitation: response.precipitation?.total || 0,
-        humidity: response.humidity?.afternoon || 0,
-        cloudCover: response.cloud_cover?.afternoon || 0,
-      }));
-
-      setPrecipitationData(transformedData.reverse());
-      setError(null);
-    } catch (error) {
-      console.error('Error fetching precipitation data:', error);
-      setError('Failed to fetch precipitation data');
-      setShowGraphs(false);
-    } finally {
-      setIsLoadingPrecipitation(false);
-    }
-  };
-
   return (
     <div className="flex justify-center items-start pt-16">
       <div className="w-full max-w-4xl mx-4 sm:mx-6 lg:mx-8 px-4 sm:px-6 lg:px-8 py-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg mb-8">
-        {/* Display Cached Favorites */}
         {cachedFavorites.length > 0 && (
           <div className="mb-4">
             <h3 className="text-lg font-medium mb-2 text-gray-900 dark:text-white">Popular Locations</h3>
@@ -278,45 +212,27 @@ export default function Home() {
         <WeatherDisplay weatherData={weatherData} rainFallsData={rainFallsData} snowDepthData={snowDepthData} />
 
         {weatherData && (
-          <>
-            <button
-              onClick={handleShowForecast}
-              className="w-full p-2 mb-4 bg-green-500 text-white rounded hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-500"
-            >
-              Show weather forecast
-            </button>
-            <ForecastDisplay forecastData={forecastData} />
-            <button
-              onClick={fetchPrecipitations}
-              className="w-full p-2 mb-4 bg-blue-500 text-white rounded hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500"
-            >
-              View last {numDays} days of precipitation
-            </button>
-          </>
+          <ForecastDisplay
+            weatherData={weatherData}
+            forecastData={forecastData}
+            setForecastData={setForecastData}
+            setError={setError}
+          />
         )}
 
         {weatherData && (
-          <div className="mb-4">
-            <label htmlFor="numDays" className="mr-2 text-gray-900 dark:text-gray-200">
-              Number of days:
-            </label>
-            <input
-              type="number"
-              id="numDays"
-              value={numDays}
-              onChange={handleNumDaysChange}
-              onBlur={handleNumDaysBlur}
-              min="1"
-              className="border rounded p-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-        )}
-
-        {showGraphs && (
           <GraphsDisplay
+            weatherData={weatherData}
             precipitationData={precipitationData}
+            setPrecipitationData={setPrecipitationData}
             isLoadingPrecipitation={isLoadingPrecipitation}
+            setIsLoadingPrecipitation={setIsLoadingPrecipitation}
+            showGraphs={showGraphs}
+            setShowGraphs={setShowGraphs}
             numDays={numDays}
+            setNumDays={setNumDays}
+            setError={setError}
+            defaultDays={DEFAULT_DAYS}
           />
         )}
       </div>
