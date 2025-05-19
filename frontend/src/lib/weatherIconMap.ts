@@ -1,3 +1,4 @@
+// src/lib/weatherIconMap.ts
 export const weatherIconMap: { [key: string]: string } = {
   "01d": "wi-day-sunny",
   "01n": "wi-night-clear",
@@ -17,4 +18,32 @@ export const weatherIconMap: { [key: string]: string } = {
   "13n": "wi-snow",
   "50d": "wi-fog",
   "50n": "wi-fog",
+};
+export const weatherIconColorMap: Record<string, string> = {
+  '01d': 'text-yellow-400',
+  '01n': 'text-blue-300',
+  '02d': 'text-yellow-300',
+  '02n': 'text-blue-200',
+  '03d': 'text-gray-400',
+  '03n': 'text-gray-500',
+  '04d': 'text-gray-500',
+  '04n': 'text-gray-600',
+  '09d': 'text-blue-500',
+  '09n': 'text-blue-600',
+  '10d': 'text-blue-400',
+  '10n': 'text-blue-500',
+  '11d': 'text-purple-500',
+  '11n': 'text-purple-600',
+  '13d': 'text-white',
+  '13n': 'text-white',
+  '50d': 'text-gray-300',
+  '50n': 'text-gray-400',
+};
+export const weatherIconAnimationMap: Record<string, string> = {
+  '09d': 'pulse-slow',
+  '09n': 'pulse-slow',
+  '11d': 'spin-slow',
+  '11n': 'spin-slow',
+  '13d': 'bounce-slow',
+  '13n': 'bounce-slow',
 };

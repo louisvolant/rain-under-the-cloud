@@ -1,7 +1,10 @@
 /* src/app/globals.css */
+@import 'weathericons/css/weather-icons.css';
+@import 'weathericons/css/weather-icons-wind.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
 
 :root {
   --background: #ffffff;
@@ -31,4 +34,39 @@ body {
   .transition-all {
     transition: all 0.3s ease;
   }
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spin-slow {
+  animation: spin 3s linear infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.15);
+  }
+}
+
+.pulse-slow {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.bounce-slow {
+  animation: bounce 1.5s ease-in-out infinite;
 }

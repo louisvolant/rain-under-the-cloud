@@ -4,7 +4,7 @@
 import { ForecastData, WeatherData } from '@/lib/types';
 import { useTheme } from './ThemeProvider';
 import { getForecast } from '@/lib/weather_api';
-import { weatherIconMap } from '@/lib/weatherIconMap';
+import { weatherIconMap, weatherIconColorMap, weatherIconAnimationMap } from '@/lib/weatherIconMap';
 
 interface ForecastDisplayProps {
   weatherData: WeatherData | null;
@@ -100,23 +100,25 @@ export default function ForecastDisplay({ weatherData, forecastData, setForecast
                       {items.map((item, index) => {
                         const description = item.weather[0].description;
                         return (
-                          <div
-                            key={index}
-                            className={`flex flex-col items-center min-w-[100px] p-1 border-r-[0.5px] last:border-r-0 ${
-                              darkMode ? 'border-gray-600' : 'border-gray-300'
-                            }`}
-                          >
-                            <span className="text-xs font-medium mb-1">{new Date(item.dt * 1000).getHours()}h</span>
-                            <div className={`flex-shrink-0 rounded-full p-1 mb-1 ${darkMode ? 'bg-gray-700' : 'bg-white'}`}>
-                              <i
-                                className={`wi ${weatherIconMap[item.weather[0].icon]} text-3xl ${
-                                  darkMode ? 'text-gray-100' : 'text-gray-800'
-                                }`}
-                              />
+                            <div
+                              key={index}
+                              className={`flex flex-col items-center min-w-[100px] p-1 border-r-[0.5px] last:border-r-0 ${
+                                darkMode ? 'border-gray-600' : 'border-gray-300'
+                              }`}
+                            >
+                              <span className="text-xs font-medium mb-1">{new Date(item.dt * 1000).getHours()}h</span>
+
+                              <div className={`flex-shrink-0 rounded-full p-1 mb-1 ${darkMode ? 'bg-gray-700' : 'bg-white'}`}>
+                                    <i
+                                      className={`wi ${weatherIconMap[item.weather[0].icon]} text-3xl ${
+                                        weatherIconColorMap[item.weather[0].icon]
+                                      } ${weatherIconAnimationMap[item.weather[0].icon] || ''}`}
+                                    />
+                              </div>
+
+                              <span className="text-xs font-medium mb-1">{item.main.temp.toFixed(1)}°C</span>
+                              <span className="text-[10px] text-center capitalize">{item.weather[0].description}</span>
                             </div>
-                            <span className="text-xs font-medium mb-1">{item.main.temp.toFixed(1)}°C</span>
-                            <span className="text-[10px] text-center capitalize">{description}</span>
-                          </div>
                         );
                       })}
                     </div>
