@@ -1,10 +1,10 @@
 // src/components/ForecastDisplay.tsx
 'use client';
 
-import Image from 'next/image';
 import { ForecastData, WeatherData } from '@/lib/types';
 import { useTheme } from './ThemeProvider';
 import { getForecast } from '@/lib/weather_api';
+import { weatherIconMap } from '@/lib/weatherIconMap';
 
 interface ForecastDisplayProps {
   weatherData: WeatherData | null;
@@ -99,7 +99,6 @@ export default function ForecastDisplay({ weatherData, forecastData, setForecast
                     <div className="flex flex-row gap-2">
                       {items.map((item, index) => {
                         const description = item.weather[0].description;
-                        const iconSrc = `https://openweathermap.org/img/wn/${item.weather[0].icon}@2x.png`;
                         return (
                           <div
                             key={index}
@@ -109,7 +108,11 @@ export default function ForecastDisplay({ weatherData, forecastData, setForecast
                           >
                             <span className="text-xs font-medium mb-1">{new Date(item.dt * 1000).getHours()}h</span>
                             <div className={`flex-shrink-0 rounded-full p-1 mb-1 ${darkMode ? 'bg-gray-700' : 'bg-white'}`}>
-                              <Image src={iconSrc} alt={description} width={36} height={36} />
+                              <i
+                                className={`wi ${weatherIconMap[item.weather[0].icon]} text-3xl ${
+                                  darkMode ? 'text-gray-100' : 'text-gray-800'
+                                }`}
+                              />
                             </div>
                             <span className="text-xs font-medium mb-1">{item.main.temp.toFixed(1)}°C</span>
                             <span className="text-[10px] text-center capitalize">{description}</span>
