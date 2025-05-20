@@ -1,6 +1,6 @@
 // src/components/ForecastDisplay.tsx
 'use client';
-
+import { useEffect } from 'react';
 import { ForecastData, WeatherData } from '@/lib/types';
 import { useTheme } from './ThemeProvider';
 import { getForecast } from '@/lib/weather_api';
@@ -74,6 +74,12 @@ export default function ForecastDisplay({ weatherData, forecastData, setForecast
     return { grouped, dateLabels };
   };
 
+  useEffect(() => {
+    if (weatherData && !forecastData) {
+      handleShowForecast();
+    }
+  }, [weatherData]);
+
   return (
     <div className="mb-4">
       <button
@@ -98,7 +104,6 @@ export default function ForecastDisplay({ weatherData, forecastData, setForecast
                   <div className="overflow-x-auto scroll-smooth">
                     <div className="flex flex-row gap-2">
                       {items.map((item, index) => {
-                        const description = item.weather[0].description;
                         return (
                             <div
                               key={index}
