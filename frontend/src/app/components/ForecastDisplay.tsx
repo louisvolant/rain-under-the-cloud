@@ -37,24 +37,26 @@ export default function ForecastDisplay({ weatherData, forecastData, setForecast
     }
   };
 
-  const formatDateDisplay = (date: Date, currentDate: Date): string => {
-    const today = new Date(currentDate.setHours(0, 0, 0, 0));
-    const forecastDate = new Date(date.setHours(0, 0, 0, 0));
-    const tomorrow = new Date(today);
-    tomorrow.setDate(today.getDate() + 1);
+    const formatDateDisplay = (date: Date, currentDate: Date): string => {
+      const today = new Date(currentDate.setHours(0, 0, 0, 0));
+      const forecastDate = new Date(date.setHours(0, 0, 0, 0));
+      const tomorrow = new Date(today);
+      tomorrow.setDate(today.getDate() + 1);
+    
+      const currentHour = currentDate.getHours(); // 18:30 PM CEST = 18
 
-    const currentHour = currentDate.getHours(); // 18:30 PM CEST = 18
+      if (forecastDate.getTime() === today.getTime()) {
+        return currentHour >= 18 ? 'Tonight' : 'This afternoon';
+      } else if (forecastDate.getTime() === tomorrow.getTime()) {
+        return 'Tomorrow';
+      } else {
+        const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
+        const day = date.getDate();
+        const month = date.toLocaleDateString('en-US', { month: 'long' });
+        return `${dayName} ${day}${getOrdinalSuffix(day)} ${month}`;
+      }
+    };
 
-    if (forecastDate.getTime() === today.getTime()) {
-      return currentHour >= 18 ? 'Tonight' : 'This afternoon';
-    } else if (forecastDate.getTime() === tomorrow.getTime()) {
-      return 'Tomorrow';
-    } else {
-      const day = date.getDate();
-      const month = date.toLocaleDateString('en-US', { month: 'long' });
-      return `${day}${getOrdinalSuffix(day)} ${month}`;
-    }
-  };
 
   const groupForecastByDay = (forecast: ForecastData) => {
     const currentDate = new Date('2025-05-18T18:30:00+02:00'); // Current time: 06:30 PM CEST, May 18, 2025
