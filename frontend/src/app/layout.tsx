@@ -1,30 +1,26 @@
 // src/app/layout.tsx
-import type { Metadata } from "next";
-import { SpeedInsights } from "@vercel/speed-insights/next";
-import { Geist, Geist_Mono } from "next/font/google";
-import Footer from './components/Footer';
-import { ThemeProvider } from './components/ThemeProvider';
-import HeaderButtons from './components/HeaderButtons';
-import { AuthProvider } from '@/context/AuthContext';
-import "./globals.css";
-import Link from 'next/link';
-import Image from 'next/image';
+import type { Metadata } from 'next';
+import { SpeedInsights } from '@vercel/speed-insights/next';
+import './globals.css'; // Your global styles
+import { Geist, Geist_Mono } from 'next/font/google'; // Your fonts
+
+import { defaultLocale } from '../../i18n';
 
 const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+  variable: '--font-geist-sans',
+  subsets: ['latin'],
 });
 
 const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  variable: '--font-geist-mono',
+  subsets: ['latin'],
 });
 
 export const metadata: Metadata = {
-  title: "Rain Under The Cloud",
+  title: 'Rain Under The Cloud',
   description: "Let's have fun watching weather graphs",
   icons: {
-    icon: "/icon.png",
+    icon: '/icon.png',
   },
 };
 
@@ -34,25 +30,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang={defaultLocale}> {}
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen`}>
-        <ThemeProvider>
-          <AuthProvider>
-            <header className="flex flex-col md:flex-row md:justify-between md:items-center p-4 bg-white dark:bg-gray-800 shadow-md">
-              <Link href="/" className="flex items-center space-x-2 mb-4 md:mb-0">
-                <Image src="/icon.png" alt="Rain Under The Cloud" width={40} height={40} />
-                <h1 className="text-xl font-bold text-gray-900 dark:text-white whitespace-nowrap">Rain Under The Cloud</h1>
-              </Link>
-              <div className="self-end md:self-auto">
-                <HeaderButtons />
-              </div>
-            </header>
-            <main className="flex-grow bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
-              {children}
-            </main>
-            <Footer />
-          </AuthProvider>
-        </ThemeProvider>
+        {children} {}
         <SpeedInsights />
       </body>
     </html>

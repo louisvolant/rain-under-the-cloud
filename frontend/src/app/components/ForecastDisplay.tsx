@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { ForecastData, WeatherData } from '@/lib/types';
 import { useTheme } from './ThemeProvider';
 import { getForecast } from '@/lib/weather_api';
+import { useTranslations, useLocale } from 'next-intl';
 
 interface ForecastDisplayProps {
   weatherData: WeatherData | null;
@@ -15,6 +16,8 @@ interface ForecastDisplayProps {
 
 export default function ForecastDisplay({ weatherData, forecastData, setForecastData, setError }: ForecastDisplayProps) {
   const { darkMode } = useTheme();
+  const t = useTranslations();
+  const locale = useLocale();
 
   const handleShowForecast = async () => {
     if (!weatherData) return;
@@ -28,13 +31,16 @@ export default function ForecastDisplay({ weatherData, forecastData, setForecast
   };
 
   const getOrdinalSuffix = (day: number): string => {
-    if (day >= 11 && day <= 13) return 'th';
-    switch (day % 10) {
-      case 1: return 'st';
-      case 2: return 'nd';
-      case 3: return 'rd';
-      default: return 'th';
+    if (locale === 'en') {
+      if (day >= 11 && day <= 13) return 'th';
+      switch (day % 10) {
+        case 1: return 'st';
+        case 2: return 'nd';
+        case 3: return 'rd';
+        default: return 'th';
+      }
     }
+    return '';
   };
 
   const formatDateDisplay = (date: Date, currentDate: Date): string => {
@@ -43,21 +49,21 @@ export default function ForecastDisplay({ weatherData, forecastData, setForecast
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
 
-    const currentHour = currentDate.getHours(); // 18:30 PM CEST = 18
+    const currentHour = currentDate.getHours();
 
     if (forecastDate.getTime() === today.getTime()) {
-      return currentHour >= 18 ? 'Tonight' : 'This afternoon';
+      return currentHour >= 18 ? t('tonight') : t('this_afternoon');
     } else if (forecastDate.getTime() === tomorrow.getTime()) {
-      return 'Tomorrow';
+      return t('tomorrow');
     } else {
       const day = date.getDate();
-      const month = date.toLocaleDateString('en-US', { month: 'long' });
+      const month = date.toLocaleDateString(locale, { month: 'long' });
       return `${day}${getOrdinalSuffix(day)} ${month}`;
     }
   };
 
   const groupForecastByDay = (forecast: ForecastData) => {
-    const currentDate = new Date('2025-05-18T18:30:00+02:00'); // Current time: 06:30 PM CEST, May 18, 2025
+    const currentDate = new Date();
     const grouped: { [key: string]: { dt: number; main: { temp: number }; weather: { description: string; icon: string }[] }[] } = {};
     const dateLabels: { [key: string]: string } = {};
 
@@ -83,12 +89,12 @@ export default function ForecastDisplay({ weatherData, forecastData, setForecast
         }`}
         disabled={!weatherData}
       >
-        Show weather forecast
+        {t('show_forecast')}
       </button>
 
       {forecastData && (
         <div className={`p-6 rounded-lg shadow-md mb-4 ${darkMode ? 'bg-green-800' : 'bg-green-50'} text-gray-950 dark:text-gray-100`}>
-          <h2 className="text-2xl font-semibold mb-3">Weather Forecast</h2>
+          <h2 className="text-2xl font-semibold mb-3">{t('weather_forecast')}</h2>
           <div className="flex flex-col gap-6">
             {(() => {
               const { grouped, dateLabels } = groupForecastByDay(forecastData);

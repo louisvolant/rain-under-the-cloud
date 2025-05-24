@@ -1,17 +1,19 @@
-// src/app/page.tsx
+// src/app/[lang]/page.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
-import { search, getWeatherAndSnow, getDistance, fetchCachedFavorites } from "@/lib/weather_api";
+import { search, getWeatherAndSnow, getDistance, fetchCachedFavorites } from '@/lib/weather_api';
 import { Location, WeatherData, PrecipitationData, ForecastData } from '@/lib/types';
-import WeatherDisplay from './components/WeatherDisplay';
-import ForecastDisplay from './components/ForecastDisplay';
-import GraphsDisplay from './components/GraphsDisplay';
+import WeatherDisplay from '../components/WeatherDisplay';
+import ForecastDisplay from '../components/ForecastDisplay';
+import GraphsDisplay from '../components/GraphsDisplay';
+import { useTranslations } from 'next-intl';
 
 const DEFAULT_DAYS = 3;
 const LOCAL_STORAGE_KEY = 'cachedFavorites';
 
 export default function Home() {
+  const t = useTranslations();
   const [numDays, setNumDays] = useState<number | string>(DEFAULT_DAYS);
   const [city, setCity] = useState('');
   const [locations, setLocations] = useState<Location[]>([]);
@@ -150,7 +152,7 @@ export default function Home() {
       <div className="w-full max-w-4xl mx-4 sm:mx-6 lg:mx-8 px-4 sm:px-6 lg:px-8 py-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg mb-8">
         {cachedFavorites.length > 0 && (
           <div className="mb-4">
-            <h3 className="text-lg font-medium mb-2 text-gray-900 dark:text-white">Popular Locations</h3>
+            <h3 className="text-lg font-medium mb-2 text-gray-900 dark:text-white">{t('popular_locations')}</h3>
             <div className="flex flex-wrap gap-2">
               {cachedFavorites.map((fav, index) => (
                 <button
@@ -170,7 +172,7 @@ export default function Home() {
           value={city}
           onChange={(e) => setCity(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Enter a city"
+          placeholder={t('search_placeholder')}
           className="w-full p-2 mb-4 border rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <button
@@ -183,15 +185,15 @@ export default function Home() {
           {isSearching ? (
             <>
               <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-              Searching...
+              {t('search_button')}
             </>
           ) : (
-            'Search'
+            t('search_button')
           )}
         </button>
 
         {error && <div className="text-red-600 dark:text-red-400 mb-4">{error}</div>}
-        {noResults && <div className="text-gray-600 dark:text-gray-400 mb-4">No result found for this place</div>}
+        {noResults && <div className="text-gray-600 dark:text-gray-400 mb-4">{t('no_results')}</div>}
 
         {locations.length > 0 && (
           <div className="mb-4">
