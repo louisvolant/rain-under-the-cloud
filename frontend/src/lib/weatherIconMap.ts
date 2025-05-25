@@ -1,4 +1,31 @@
 // src/lib/weatherIconMap.ts
+
+export const weatherIconColorMap: Record<string, string> = {
+  '01d': 'text-yellow-400',        // Sunny day
+  '01n': 'text-indigo-400',        // Clear night (deep night sky)
+  '02d': 'text-yellow-300',        // Few clouds day
+  '02n': 'text-indigo-300',        // Few clouds night
+  '03d': 'text-gray-400',          // Scattered clouds day
+  '03n': 'text-gray-500 dark:text-gray-400', // Scattered clouds night (ensure good contrast in dark mode if needed)
+  '04d': 'text-gray-500 dark:text-gray-400', // Broken clouds day
+  '04n': 'text-gray-600 dark:text-gray-500', // Broken clouds night
+
+  '09d': 'text-blue-400',          // Showers day (lighter blue)
+  '09n': 'text-blue-500',          // Showers night
+  '10d': 'text-blue-500',          // Rain day (standard blue)
+  '10n': 'text-blue-500',          // Rain night
+
+  '11d': 'text-purple-500',        // Thunderstorm day
+  '11n': 'text-purple-600',        // Thunderstorm night
+
+  '13d': 'text-sky-300',           // Snow day (icy blue, visible on white bg)
+  '13n': 'text-sky-300',           // Snow night (consistent icy blue)
+
+  '50d': 'text-slate-400',         // Fog/Mist day (slate has a bit of blue, good for atmosphere)
+  '50n': 'text-slate-500',         // Fog/Mist night
+};
+
+// Your weatherIconMap and weatherIconAnimationMap remain the same as you provided.
 export const weatherIconMap: { [key: string]: string } = {
   "01d": "wi-day-sunny",
   "01n": "wi-night-clear",
@@ -19,26 +46,7 @@ export const weatherIconMap: { [key: string]: string } = {
   "50d": "wi-fog",
   "50n": "wi-fog",
 };
-export const weatherIconColorMap: Record<string, string> = {
-  '01d': 'text-yellow-400',
-  '01n': 'text-blue-300',
-  '02d': 'text-yellow-300',
-  '02n': 'text-blue-200',
-  '03d': 'text-gray-400',
-  '03n': 'text-gray-500',
-  '04d': 'text-gray-500',
-  '04n': 'text-gray-600',
-  '09d': 'text-blue-500',
-  '09n': 'text-blue-600',
-  '10d': 'text-blue-400',
-  '10n': 'text-blue-500',
-  '11d': 'text-purple-500',
-  '11n': 'text-purple-600',
-  '13d': 'text-white',
-  '13n': 'text-white',
-  '50d': 'text-gray-300',
-  '50n': 'text-gray-400',
-};
+
 export const weatherIconAnimationMap: Record<string, string> = {
   '09d': 'pulse-slow',
   '09n': 'pulse-slow',

@@ -42,7 +42,7 @@ export default function ForecastDisplay({ weatherData, forecastData, setForecast
       const forecastDate = new Date(date.setHours(0, 0, 0, 0));
       const tomorrow = new Date(today);
       tomorrow.setDate(today.getDate() + 1);
-    
+
       const currentHour = currentDate.getHours(); // 18:30 PM CEST = 18
 
       if (forecastDate.getTime() === today.getTime()) {
