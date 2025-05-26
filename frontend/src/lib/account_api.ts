@@ -14,8 +14,15 @@ export async function getFavorites(): Promise<FavoriteLocation[]> {
   return response.data;
 }
 
-export const addFavorite = async (location: { location_name: string; latitude: number; longitude: number }) => {
-  const response = await api.post('/api/add-favorite', location, { withCredentials: true });
+interface AddFavoritePayload {
+  location_name: string;
+  latitude: number;
+  longitude: number;
+  country_code: string;
+}
+
+export const addFavorite = async (favoriteData: AddFavoritePayload) => {
+  const response = await api.post('/api/add-favorite', favoriteData, { withCredentials: true });
   return response.data;
 }
 

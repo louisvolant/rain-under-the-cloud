@@ -35,10 +35,10 @@ router.post('/add-favorite', async (req, res) => {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
-  const { location_name, latitude, longitude } = req.body;
+  const { location_name, latitude, longitude, country_code } = req.body; // Destructure country_code
 
-  if (!location_name || latitude == null || longitude == null) {
-    return res.status(400).json({ error: 'Missing required fields' });
+  if (!location_name || latitude == null || longitude == null || !country_code) { // Add country_code to validation
+    return res.status(400).json({ error: 'Missing required fields (location_name, latitude, longitude, country_code)' });
   }
 
   try {
@@ -47,18 +47,22 @@ router.post('/add-favorite', async (req, res) => {
       location_name,
       latitude,
       longitude,
+      country_code,
     });
 
     if (existingFavorite) {
-      return res.status(200).json(existingFavorite);
+      return res.status(200).json(existingFavorite); // Or return a message indicating it already exists
     }
 
-    apicache.clear('/api/favorites');
+    apicache.clear('/api/favorites'); // Assuming this is the correct cache key for user-specific favorites
+    apicache.clear('/api/cached-favorites'); // Clear general cached favorites as well
+
     const newFavorite = new UserFavoritesModel({
       user_id: req.session.user.id,
       location_name,
       longitude,
       latitude,
+      country_code,
     });
     await newFavorite.save();
     res.status(201).json(newFavorite);
@@ -106,7 +110,6 @@ const DEFAULT_CACHED_FAVORITES = 3;
 // Get cached favorites of all users (deduplicated, max 3)
 router.get('/cached-favorites', async (req, res) => {
   try {
-    // Fetch all favorites from the database
     const allFavorites = await UserFavoritesModel.find({});
 
     if (!allFavorites || allFavorites.length === 0) {
@@ -114,23 +117,27 @@ router.get('/cached-favorites', async (req, res) => {
       return res.json([]);
     }
 
-    // Deduplicate by latitude and longitude, keeping the first occurrence
     const uniqueFavorites = Array.from(
       new Map(
         allFavorites.map((fav) => [
-          `${fav.latitude},${fav.longitude}`,
-          { location_name: fav.location_name, latitude: fav.latitude, longitude: fav.longitude },
+          `${fav.latitude},${fav.longitude}`, // De-duplication key
+          {
+            location_name: fav.location_name,
+            latitude: fav.latitude,
+            longitude: fav.longitude,
+            country_code: fav.country_code
+          },
         ])
       ).values()
     );
 
-    // Take up to 3 favorites and return only location names with coordinates
     const cachedFavorites = uniqueFavorites
       .slice(0, DEFAULT_CACHED_FAVORITES)
       .map((fav) => ({
         location_name: fav.location_name,
         lat: fav.latitude,
         lon: fav.longitude,
+        country: fav.country_code
       }));
 
     res.json(cachedFavorites);

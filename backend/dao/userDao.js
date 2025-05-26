@@ -21,7 +21,8 @@ const userFavoritesSchema = new mongoose.Schema({
   user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Users', required: true },
   location_name: { type: String, required: true },
   longitude: { type: Number, required: true },
-  latitude: { type: Number, required: true }
+  latitude: { type: Number, required: true },
+  country_code: { type: String, required: true }
 });
 const UserFavoritesModel = mongoose.model('UserFavorites', userFavoritesSchema, 'UserFavorites');
 
