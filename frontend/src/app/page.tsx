@@ -129,10 +129,8 @@ export default function Home() {
       setIsSearching(true);
       const { weather, rainFalls, snowDepth } = await getWeatherAndSnow(location.lat!, location.lon!);
       if (weather) {
-        // Ensure weather.name includes country for WeatherDisplay if desired, though flag isn't added there yet
         weather.name = location.name || location.location_name || 'Unknown Location';
-        // If you decide to pass country to WeatherDisplay, you'd add it here:
-        // weather.country = location.country;
+        weather.country = location.country;
         setWeatherData(weather);
         setRainFallsData(rainFalls);
         setSnowDepthData(snowDepth);
@@ -161,7 +159,7 @@ export default function Home() {
                   onClick={() => handleLocationClick({ location_name: fav.location_name, lat: fav.lat, lon: fav.lon, country: fav.country })} // Pass country here too
                   className="p-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors flex items-center" // Added flex items-center
                 >
-                  {fav.country && ( 
+                  {fav.country && (
                     <span className={`fi fi-${fav.country.toLowerCase()} mr-2 rounded`}></span>
                   )}
                   {fav.location_name}

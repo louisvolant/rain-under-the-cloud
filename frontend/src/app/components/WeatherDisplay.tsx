@@ -22,7 +22,7 @@ export default function WeatherDisplay({ weatherData, rainFallsData, snowDepthDa
 
   return (
     <div className={`p-4 rounded mb-4 ${darkMode ? 'bg-blue-900' : 'bg-blue-100'} text-gray-900 dark:text-gray-200`}>
-      <h2 className="text-xl font-semibold mb-3 flex items-center"> {/* Added flex items-center */}
+      <h2 className="text-xl font-semibold mb-3 flex items-center">
         {weatherData.country && (
           <span className={`fi fi-${weatherData.country.toLowerCase()} mr-2 rounded`}></span>
         )}

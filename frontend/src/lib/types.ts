@@ -17,7 +17,6 @@ export interface FavoriteLocation {
   __v?: number;
 }
 
-
 export interface Location {
   name: string;
   lat: number;
