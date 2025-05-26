@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { search, getWeatherAndSnow, getDistance, fetchCachedFavorites } from "@/lib/weather_api";
-import { Location, WeatherData, PrecipitationData, ForecastData } from '@/lib/types';
+import { Location, WeatherData, PrecipitationData, ForecastData, CachedFavoriteLocation } from '@/lib/types';
 import WeatherDisplay from './components/WeatherDisplay';
 import ForecastDisplay from './components/ForecastDisplay';
 import GraphsDisplay from './components/GraphsDisplay';
@@ -25,7 +25,7 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [noResults, setNoResults] = useState(false);
   const [showGraphs, setShowGraphs] = useState(false);
-  const [cachedFavorites, setCachedFavorites] = useState<{ location_name: string; lat: number; lon: number }[]>([]);
+  const [cachedFavorites, setCachedFavorites] = useState<CachedFavoriteLocation[]>([]);
 
   useEffect(() => {
     const storedFavorites = localStorage.getItem(LOCAL_STORAGE_KEY);
@@ -158,10 +158,12 @@ export default function Home() {
               {cachedFavorites.map((fav, index) => (
                 <button
                   key={index}
-                  onClick={() => handleLocationClick({ location_name: fav.location_name, lat: fav.lat, lon: fav.lon })}
-                  className="p-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+                  onClick={() => handleLocationClick({ location_name: fav.location_name, lat: fav.lat, lon: fav.lon, country: fav.country })} // Pass country here too
+                  className="p-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors flex items-center" // Added flex items-center
                 >
-                  {/* Add flag here if country code becomes available for cachedFavorites */}
+                  {fav.country && ( 
+                    <span className={`fi fi-${fav.country.toLowerCase()} mr-2 rounded`}></span>
+                  )}
                   {fav.location_name}
                 </button>
               ))}

@@ -1,5 +1,11 @@
 // src/lib/types.ts
 
+export interface CachedFavoriteLocation {
+  location_name: string;
+  lat: number;
+  lon: number;
+  country: string;
+}
 
 export interface FavoriteLocation {
   _id: string;
