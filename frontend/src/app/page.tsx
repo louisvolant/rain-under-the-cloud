@@ -129,7 +129,10 @@ export default function Home() {
       setIsSearching(true);
       const { weather, rainFalls, snowDepth } = await getWeatherAndSnow(location.lat!, location.lon!);
       if (weather) {
+        // Ensure weather.name includes country for WeatherDisplay if desired, though flag isn't added there yet
         weather.name = location.name || location.location_name || 'Unknown Location';
+        // If you decide to pass country to WeatherDisplay, you'd add it here:
+        // weather.country = location.country;
         setWeatherData(weather);
         setRainFallsData(rainFalls);
         setSnowDepthData(snowDepth);
@@ -146,7 +149,7 @@ export default function Home() {
   };
 
   return (
-    <div className="flex justify-center items-start pt-16">
+    <div className="flex justify-center items-start pt-16" >
       <div className="w-full max-w-4xl mx-4 sm:mx-6 lg:mx-8 px-4 sm:px-6 lg:px-8 py-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg mb-8">
         {cachedFavorites.length > 0 && (
           <div className="mb-4">
@@ -158,6 +161,7 @@ export default function Home() {
                   onClick={() => handleLocationClick({ location_name: fav.location_name, lat: fav.lat, lon: fav.lon })}
                   className="p-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
                 >
+                  {/* Add flag here if country code becomes available for cachedFavorites */}
                   {fav.location_name}
                 </button>
               ))}
@@ -199,8 +203,10 @@ export default function Home() {
               <div
                 key={index}
                 onClick={() => handleLocationClick(location)}
-                className="p-2 mb-2 bg-gray-200 dark:bg-gray-700 cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-200"
-              >
+                className="p-2 mb-2 bg-gray-200 dark:bg-gray-700 cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-200 flex items-center" >
+                {location.country && ( /* Check if country exists */
+                  <span className={`fi fi-${location.country.toLowerCase()} mr-2 rounded`} ></span> /* Added flag icon with margin and rounded corners for the flag itself */
+                )}
                 {location.name}, {location.country} {location.state ? `(${location.state})` : ''}
               </div>
             ))}

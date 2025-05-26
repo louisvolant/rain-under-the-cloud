@@ -22,6 +22,7 @@ export interface Location {
 
 export interface WeatherData {
   name: string;
+  country?: string;
   main: {
     temp: number;
     feels_like: number;

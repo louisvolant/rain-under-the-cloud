@@ -7,22 +7,27 @@
    Sun, Cloud, Droplets, Wind, Eye, Sunrise, Sunset, CloudRain, Snowflake
  } from 'lucide-react';
 
- interface WeatherDisplayProps {
-   weatherData: WeatherData | null;
-   rainFallsData: number | null;
-   snowDepthData: number | null;
- }
+interface WeatherDisplayProps {
+  weatherData: WeatherData | null; // WeatherData might now include country
+  rainFallsData: number | null;
+  snowDepthData: number | null;
+}
 
- export default function WeatherDisplay({ weatherData, rainFallsData, snowDepthData }: WeatherDisplayProps) {
-   const { darkMode } = useTheme();
-   if (!weatherData) return null;
+export default function WeatherDisplay({ weatherData, rainFallsData, snowDepthData }: WeatherDisplayProps) {
+  const { darkMode } = useTheme();
+  if (!weatherData) return null;
 
-   const formatTime = (timestamp: number) =>
-     new Date(timestamp * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const formatTime = (timestamp: number) =>
+    new Date(timestamp * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-   return (
-     <div className={`p-4 rounded mb-4 ${darkMode ? 'bg-blue-900' : 'bg-blue-100'} text-gray-900 dark:text-gray-200`}>
-       <h2 className="text-xl font-semibold mb-3">{weatherData.name}</h2>
+  return (
+    <div className={`p-4 rounded mb-4 ${darkMode ? 'bg-blue-900' : 'bg-blue-100'} text-gray-900 dark:text-gray-200`}>
+      <h2 className="text-xl font-semibold mb-3 flex items-center"> {/* Added flex items-center */}
+        {weatherData.country && (
+          <span className={`fi fi-${weatherData.country.toLowerCase()} mr-2 rounded`}></span>
+        )}
+        {weatherData.name}
+      </h2>
 
        {/* Temperature */}
        <div className="flex items-center text-lg mb-2 gap-2">

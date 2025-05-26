@@ -1,4 +1,5 @@
 /* src/app/globals.css */
+@import 'flag-icons/css/flag-icons.min.css';
 @import 'weathericons/css/weather-icons.css';
 @import 'weathericons/css/weather-icons-wind.css';
 @tailwind base;
