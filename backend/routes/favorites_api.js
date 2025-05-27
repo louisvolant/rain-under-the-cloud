@@ -54,8 +54,8 @@ router.post('/add-favorite', async (req, res) => {
       return res.status(200).json(existingFavorite); // Or return a message indicating it already exists
     }
 
-    apicache.clear('/api/favorites'); // Assuming this is the correct cache key for user-specific favorites
-    apicache.clear('/api/cached-favorites'); // Clear general cached favorites as well
+    apicache.clear('/api/favorites');
+    apicache.clear('/api/cached-favorites');
 
     const newFavorite = new UserFavoritesModel({
       user_id: req.session.user.id,
