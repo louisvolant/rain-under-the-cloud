@@ -124,27 +124,30 @@ export default function Home() {
     }
   };
 
-  const handleLocationClick = async (location: Partial<Location>) => {
-    try {
-      setIsSearching(true);
-      const { weather, rainFalls, snowDepth } = await getWeatherAndSnow(location.lat!, location.lon!);
-      if (weather) {
-        weather.name = location.name || location.location_name || 'Unknown Location';
-        weather.country = location.country;
-        setWeatherData(weather);
-        setRainFallsData(rainFalls);
-        setSnowDepthData(snowDepth);
-        setLocations([]);
-        setError(null);
-      } else {
-        setError('Failed to fetch weather data');
+    const handleLocationClick = async (location: Partial<Location>) => {
+      try {
+        setIsSearching(true);
+        const { weather, rainFalls, snowDepth } = await getWeatherAndSnow(location.lat!, location.lon!);
+
+        if (weather) {
+          const weatherDataToSet: WeatherData = weather as WeatherData;
+          weatherDataToSet.name = location.name || location.location_name || 'Unknown Location';
+          weatherDataToSet.country = location.country;
+          setWeatherData(weatherDataToSet);
+          setRainFallsData(rainFalls);
+          setSnowDepthData(snowDepth);
+          setLocations([]);
+          setError(null);
+        } else {
+          setError('Failed to fetch weather data');
+        }
+      } catch (err) {
+        console.error('Error in handleLocationClick:', err);
+        setError('Failed to fetch weather and snow data');
+      } finally {
+        setIsSearching(false);
       }
-    } catch {
-      setError('Failed to fetch weather and snow data');
-    } finally {
-      setIsSearching(false);
-    }
-  };
+    };
 
   return (
     <div className="flex justify-center items-start pt-16" >

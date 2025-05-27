@@ -80,7 +80,7 @@ export default function ForecastDisplay({ weatherData, forecastData, setForecast
     if (weatherData && !forecastData) {
       handleShowForecast();
     }
-  }, [weatherData]);
+  },[weatherData, forecastData, handleShowForecast]);
 
   return (
     <div className="mb-4">

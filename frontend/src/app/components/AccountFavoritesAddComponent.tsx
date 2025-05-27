@@ -121,7 +121,7 @@ export default function AccountFavoritesAddComponent({
         </div>
       )}
       {searchCity && !isSearching && locations.length === 0 && (
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">No results found for "{searchCity}".</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">No results found for &apos;{searchCity}&apos;.</p>
       )}
     </div>
   );
