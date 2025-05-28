@@ -1,6 +1,6 @@
 // src/components/ForecastDisplay.tsx
 'use client';
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { ForecastData, WeatherData } from '@/lib/types';
 import { useTheme } from './ThemeProvider';
 import { useLanguage } from '@/context/LanguageContext';
@@ -18,7 +18,7 @@ export default function ForecastDisplay({ weatherData, forecastData, setForecast
   const { darkMode } = useTheme();
   const { language, t } = useLanguage();
 
-  const handleShowForecast = async () => {
+  const handleShowForecast = useCallback(async () => {
     if (!weatherData) return;
     try {
       const data = await getForecast(weatherData.coord.lat.toString(), weatherData.coord.lon.toString());
@@ -27,7 +27,7 @@ export default function ForecastDisplay({ weatherData, forecastData, setForecast
     } catch {
       setError(t('failed_to_fetch_forecast'));
     }
-  };
+  }, [weatherData, setForecastData, setError, t]);
 
   const getOrdinalSuffix = (day: number): string => {
     // This function might need locale-specific adjustments for other languages

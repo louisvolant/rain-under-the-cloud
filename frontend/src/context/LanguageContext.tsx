@@ -18,13 +18,13 @@ type TranslationModule = { default: Record<string, string> };
 
 const loadTranslations = async (lang: Language): Promise<Record<string, string>> => {
   try {
-    const module = await import(`@/locales/${lang}.json`) as TranslationModule;
-    return module.default;
+    const mod = await import(`@/locales/${lang}.json`) as TranslationModule;
+    return mod.default;
   } catch (error) {
     console.error(`Failed to load translations for ${lang}:`, error);
     // Fallback to English if loading fails
-    const defaultModule = await import(`@/locales/en.json`) as TranslationModule;
-    return defaultModule.default;
+    const defaultMod = await import(`@/locales/en.json`) as TranslationModule;
+    return defaultMod.default;
   }
 };
 
