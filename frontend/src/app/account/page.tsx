@@ -8,12 +8,14 @@ import { useRouter } from 'next/navigation';
 import AccountFavoritesListComponent from '@/app/components/AccountFavoritesListComponent';
 import AccountFavoritesAddComponent from '@/app/components/AccountFavoritesAddComponent';
 import AccountActionsComponent from '@/app/components/AccountActionsComponent';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function Account() {
   const [favorites, setFavorites] = useState<FavoriteLocation[]>([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const router = useRouter();
+  const { t } = useLanguage();
 
   useEffect(() => {
     const checkAuthentication = async () => {
@@ -36,9 +38,9 @@ export default function Account() {
       );
       setFavorites(uniqueFavorites);
     } catch (err) {
-      console.error('Error fetching favorites:', err);
+      console.error(t('error_fetching_favorites'), err);
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, t]);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -57,7 +59,7 @@ export default function Account() {
       setRefreshTrigger((prev) => prev + 1);
     } catch (error) {
       console.error('Error adding favorite:', error);
-      alert(`Failed to add favorite: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      alert(t('failed_to_add_favorite', { error_message: error instanceof Error ? error.message : t('unexpected_error') }));
     }
   };
 
@@ -67,12 +69,12 @@ export default function Account() {
       setRefreshTrigger((prev) => prev + 1);
     } catch (error) {
       console.error('Error removing favorite:', error);
-      alert('Failed to remove favorite.');
+      alert(t('failed_to_remove_favorite'));
     }
   };
 
   const handleDeleteAccount = async () => {
-    if (!confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+    if (!confirm(t('confirm_delete_account'))) {
       return;
     }
     try {
@@ -80,21 +82,21 @@ export default function Account() {
       router.push('/');
     } catch (error) {
       console.error('Error deleting account:', error);
-      alert('Failed to delete account. Please try again.');
+      alert(t('failed_to_delete_account'));
     }
   };
 
   if (!isAuthenticated)
     return (
       <div className="flex justify-center items-center h-screen">
-        <p className="text-xl">Loading account...</p>
+        <p className="text-xl">{t('loading_account')}</p>
       </div>
     );
 
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">My Account</h1>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">{t('my_account_title')}</h1>
       </div>
 
       <AccountFavoritesListComponent

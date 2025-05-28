@@ -1,9 +1,9 @@
-// src/app/register/page.tsx
 'use client';
 
 import { useState } from 'react';
 import { register } from '@/lib/login_api';
 import { useRouter } from 'next/navigation';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function Register() {
   const [username, setUsername] = useState('');
@@ -14,13 +14,14 @@ export default function Register() {
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const router = useRouter();
+  const { t } = useLanguage();
 
   // Validation rules
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Basic email format check
 
   const validateUsername = (value: string) => {
     if (value.length <= 6) {
-      setUsernameError('Username must be more than 6 characters');
+      setUsernameError(t('username_length_error'));
     } else {
       setUsernameError('');
     }
@@ -28,7 +29,7 @@ export default function Register() {
 
   const validateEmail = (value: string) => {
     if (!emailRegex.test(value)) {
-      setEmailError('Please enter a valid email address');
+      setEmailError(t('invalid_email_error'));
     } else {
       setEmailError('');
     }
@@ -36,7 +37,7 @@ export default function Register() {
 
   const validatePassword = (value: string) => {
     if (value.length < 15) {
-      setPasswordError('Password must be at least 15 characters');
+      setPasswordError(t('password_length_error'));
     } else {
       setPasswordError('');
     }
@@ -50,7 +51,7 @@ export default function Register() {
     validatePassword(password);
 
     if (usernameError || emailError || passwordError || !username || !email || !password) {
-      setError('Please fix the errors above before submitting');
+      setError(t('fix_errors_before_submitting'));
       return;
     }
 
@@ -62,11 +63,11 @@ export default function Register() {
       if (err instanceof Error && 'response' in err) {
         // Assuming the error has a response property from fetch
         const fetchError = err as Error & { response?: { data?: { error?: string } } };
-        setError(fetchError.response?.data?.error || 'Registration failed');
+        setError(fetchError.response?.data?.error || t('registration_failed'));
       } else if (err instanceof Error) {
-        setError(err.message || 'Registration failed');
+        setError(err.message || t('registration_failed'));
       } else {
-        setError('Registration failed');
+        setError(t('registration_failed'));
       }
     }
   };
@@ -74,11 +75,11 @@ export default function Register() {
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100 dark:bg-gray-900 p-4">
       <div className="w-full max-w-md bg-white dark:bg-gray-800 shadow-lg rounded-lg p-6">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Register</h2>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">{t('register_title')}</h2>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label className="block text-gray-700 dark:text-gray-200 mb-2">
-              Username
+              {t('username_label')}
             </label>
             <input
               type="text"
@@ -96,7 +97,7 @@ export default function Register() {
           </div>
           <div>
             <label className="block text-gray-700 dark:text-gray-200 mb-2">
-              Email
+              {t('email_label')}
             </label>
             <input
               type="email"
@@ -114,7 +115,7 @@ export default function Register() {
           </div>
           <div>
             <label className="block text-gray-700 dark:text-gray-200 mb-2">
-              Password
+              {t('password_label')}
             </label>
             <input
               type="password"
@@ -137,7 +138,7 @@ export default function Register() {
               className="w-full bg-primary text-white hover:bg-primary-focus dark:bg-primary dark:hover:bg-primary-focus px-4 py-2 rounded-md transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={!!usernameError || !!emailError || !!passwordError}
             >
-              Register
+              {t('register_button')}
             </button>
           </div>
         </form>

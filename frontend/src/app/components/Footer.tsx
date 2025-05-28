@@ -4,9 +4,11 @@
 import Link from 'next/link';
 import { externalLinks } from './links';
 import { useTheme } from './ThemeProvider';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function Footer() {
   const { darkMode, toggleDarkMode } = useTheme();
+  const { t } = useLanguage();
 
   return (
     <footer className="bg-gray-200 dark:bg-gray-800 py-4">
@@ -26,12 +28,12 @@ export default function Footer() {
         {/* Copyright and Theme Toggle */}
         <div className="mt-4 flex justify-center items-center space-x-2">
           <span>
-            © {new Date().getFullYear()} RainUnderThe.Cloud. All rights reserved.
+            {t('footer_copyright', { year: new Date().getFullYear() })}
           </span>
           <button
             onClick={toggleDarkMode}
             className="p-2 bg-gray-300 dark:bg-gray-700 rounded-full hover:bg-gray-400 dark:hover:bg-gray-600 transition-colors"
-            aria-label="Toggle dark mode"
+            aria-label={t('toggle_dark_mode')}
           >
             {darkMode ? '☀️' : '🌙'}
           </button>

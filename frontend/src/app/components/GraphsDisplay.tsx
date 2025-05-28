@@ -5,6 +5,7 @@ import { ChangeEvent } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { PrecipitationData, WeatherData } from '@/lib/types';
 import { useTheme } from './ThemeProvider';
+import { useLanguage } from '@/context/LanguageContext';
 import { getOneCallDaySummary } from '@/lib/weather_api';
 
 interface GraphsDisplayProps {
@@ -35,6 +36,7 @@ export default function GraphsDisplay({
   defaultDays,
 }: GraphsDisplayProps) {
   const { darkMode } = useTheme();
+  const { t } = useLanguage();
 
   const handleNumDaysChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -80,7 +82,7 @@ export default function GraphsDisplay({
       setError(null);
     } catch (error) {
       console.error('Error fetching precipitation data:', error);
-      setError('Failed to fetch precipitation data');
+      setError(t('failed_to_fetch_precipitation'));
       setShowGraphs(false);
     } finally {
       setIsLoadingPrecipitation(false);
@@ -101,7 +103,7 @@ export default function GraphsDisplay({
         <YAxis />
         <Tooltip />
         <Legend />
-        <Bar dataKey="precipitation" fill={darkMode ? "#a3bffa" : "#8884d8"} name="Precipitation (mm)" />
+        <Bar dataKey="precipitation" fill={darkMode ? "#a3bffa" : "#8884d8"} name={t('precipitation_chart_title').replace('{numDays}', String(numDays))} />
       </BarChart>
     </ResponsiveContainer>
   );
@@ -114,7 +116,7 @@ export default function GraphsDisplay({
         <YAxis />
         <Tooltip />
         <Legend />
-        <Line type="monotone" dataKey="humidity" stroke={darkMode ? "#a3bffa" : "#82ca9d"} name="Humidity (%)" />
+        <Line type="monotone" dataKey="humidity" stroke={darkMode ? "#a3bffa" : "#82ca9d"} name={t('humidity_chart_title').replace('{numDays}', String(numDays))} />
       </LineChart>
     </ResponsiveContainer>
   );
@@ -127,7 +129,7 @@ export default function GraphsDisplay({
         <YAxis />
         <Tooltip />
         <Legend />
-        <Line type="monotone" dataKey="cloudCover" stroke={darkMode ? "#a3bffa" : "#ff7300"} name="Cloud Cover (%)" />
+        <Line type="monotone" dataKey="cloudCover" stroke={darkMode ? "#a3bffa" : "#ff7300"} name={t('cloud_cover_chart_title').replace('{numDays}', String(numDays))} />
       </LineChart>
     </ResponsiveContainer>
   );
@@ -136,7 +138,7 @@ export default function GraphsDisplay({
     <div className="mt-4">
       <div className="mb-4">
         <label htmlFor="numDays" className="mr-2 text-gray-900 dark:text-gray-200">
-          Number of days:
+          {t('number_of_days')}
         </label>
         <input
           type="number"
@@ -155,21 +157,21 @@ export default function GraphsDisplay({
         }`}
         disabled={!weatherData}
       >
-        View last {numDays} days of precipitation
+        {t('view_precipitation_button').replace('{numDays}', String(numDays))}
       </button>
 
       {showGraphs && (
         <div>
           <div className={`bg-white dark:bg-gray-800 p-4 rounded shadow ${darkMode ? 'text-white' : 'text-gray-900'}`} style={{ minHeight: '380px' }}>
-            <h3 className="text-lg font-medium mb-2">Precipitation (last {numDays} days)</h3>
+            <h3 className="text-lg font-medium mb-2">{t('precipitation_chart_title').replace('{numDays}', String(numDays))}</h3>
             {isLoadingPrecipitation ? <Spinner /> : precipitationData.length > 0 && renderPrecipitationChart()}
           </div>
           <div className={`bg-white dark:bg-gray-800 p-4 rounded shadow mt-4 ${darkMode ? 'text-white' : 'text-gray-900'}`} style={{ minHeight: '380px' }}>
-            <h3 className="text-lg font-medium mb-2">Humidity (last {numDays} days)</h3>
+            <h3 className="text-lg font-medium mb-2">{t('humidity_chart_title').replace('{numDays}', String(numDays))}</h3>
             {isLoadingPrecipitation ? <Spinner /> : precipitationData.length > 0 && renderHumidityChart()}
           </div>
           <div className={`bg-white dark:bg-gray-800 p-4 rounded shadow mt-4 ${darkMode ? 'text-white' : 'text-gray-900'}`} style={{ minHeight: '380px' }}>
-            <h3 className="text-lg font-medium mb-2">Cloud Cover (last {numDays} days)</h3>
+            <h3 className="text-lg font-medium mb-2">{t('cloud_cover_chart_title').replace('{numDays}', String(numDays))}</h3>
             {isLoadingPrecipitation ? <Spinner /> : precipitationData.length > 0 && renderCloudCoverChart()}
           </div>
         </div>

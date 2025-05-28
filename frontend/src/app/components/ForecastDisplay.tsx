@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { ForecastData, WeatherData } from '@/lib/types';
 import { useTheme } from './ThemeProvider';
+import { useLanguage } from '@/context/LanguageContext';
 import { getForecast } from '@/lib/weather_api';
 import { weatherIconMap, weatherIconColorMap, weatherIconAnimationMap } from '@/lib/weatherIconMap';
 
@@ -15,6 +16,7 @@ interface ForecastDisplayProps {
 
 export default function ForecastDisplay({ weatherData, forecastData, setForecastData, setError }: ForecastDisplayProps) {
   const { darkMode } = useTheme();
+  const { language, t } = useLanguage();
 
   const handleShowForecast = async () => {
     if (!weatherData) return;
@@ -23,18 +25,22 @@ export default function ForecastDisplay({ weatherData, forecastData, setForecast
       setForecastData(data);
       setError(null);
     } catch {
-      setError('Failed to fetch forecast');
+      setError(t('failed_to_fetch_forecast'));
     }
   };
 
   const getOrdinalSuffix = (day: number): string => {
-    if (day >= 11 && day <= 13) return 'th';
-    switch (day % 10) {
-      case 1: return 'st';
-      case 2: return 'nd';
-      case 3: return 'rd';
-      default: return 'th';
+    // This function might need locale-specific adjustments for other languages
+    if (language === 'en') {
+      if (day >= 11 && day <= 13) return 'th';
+      switch (day % 10) {
+        case 1: return 'st';
+        case 2: return 'nd';
+        case 3: return 'rd';
+        default: return 'th';
+      }
     }
+    return ''; // No suffix for other languages or handle specifically if needed
   };
 
     const formatDateDisplay = (date: Date, currentDate: Date): string => {
@@ -43,23 +49,24 @@ export default function ForecastDisplay({ weatherData, forecastData, setForecast
       const tomorrow = new Date(today);
       tomorrow.setDate(today.getDate() + 1);
 
-      const currentHour = currentDate.getHours(); // 18:30 PM CEST = 18
+      const currentHour = currentDate.getHours();
 
       if (forecastDate.getTime() === today.getTime()) {
-        return currentHour >= 18 ? 'Tonight' : 'This afternoon';
+        return currentHour >= 18 ? t('tonight_forecast') : t('today_forecast');
       } else if (forecastDate.getTime() === tomorrow.getTime()) {
-        return 'Tomorrow';
+        return t('tomorrow_forecast');
       } else {
-        const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
+        const dayName = date.toLocaleDateString(language === 'en' ? 'en-US' : (language === 'fr' ? 'fr-FR' : 'es-ES'), { weekday: 'long' });
         const day = date.getDate();
-        const month = date.toLocaleDateString('en-US', { month: 'long' });
+        const month = date.toLocaleDateString(language === 'en' ? 'en-US' : (language === 'fr' ? 'fr-FR' : 'es-ES'), { month: 'long' });
         return `${dayName} ${day}${getOrdinalSuffix(day)} ${month}`;
       }
     };
 
 
   const groupForecastByDay = (forecast: ForecastData) => {
-    const currentDate = new Date('2025-05-18T18:30:00+02:00'); // Current time: 06:30 PM CEST, May 18, 2025
+    // Current time needs to be dynamic, not hardcoded for '2025-05-18T18:30:00+02:00'
+    const currentDate = new Date();
     const grouped: { [key: string]: { dt: number; main: { temp: number }; weather: { description: string; icon: string }[] }[] } = {};
     const dateLabels: { [key: string]: string } = {};
 
@@ -91,12 +98,12 @@ export default function ForecastDisplay({ weatherData, forecastData, setForecast
         }`}
         disabled={!weatherData}
       >
-        Show weather forecast
+        {t('weather_forecast_button')}
       </button>
 
       {forecastData && (
         <div className={`p-6 rounded-lg shadow-md mb-4 ${darkMode ? 'bg-green-800' : 'bg-green-50'} text-gray-950 dark:text-gray-100`}>
-          <h2 className="text-2xl font-semibold mb-3">Weather Forecast</h2>
+          <h2 className="text-2xl font-semibold mb-3">{t('weather_forecast_title')}</h2>
           <div className="flex flex-col gap-6">
             {(() => {
               const { grouped, dateLabels } = groupForecastByDay(forecastData);

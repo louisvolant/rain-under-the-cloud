@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { search, getDistance } from '@/lib/weather_api';
 import { Location } from '@/lib/types';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface AccountFavoritesAddComponentProps {
   onAddFavorite: (location: Location) => void;
@@ -13,6 +14,7 @@ export default function AccountFavoritesAddComponent({
   const [searchCity, setSearchCity] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [locations, setLocations] = useState<Location[]>([]);
+  const { t } = useLanguage();
 
   const handleSearch = useCallback(async () => {
     if (!searchCity.trim()) {
@@ -87,15 +89,15 @@ export default function AccountFavoritesAddComponent({
 
   return (
     <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md p-6 mb-8">
-      <h2 className="text-2xl font-semibold text-blue-600 dark:text-blue-400 mb-4">Add New Favorite</h2>
+      <h2 className="text-2xl font-semibold text-blue-600 dark:text-blue-400 mb-4">{t('add_new_favorite_title')}</h2>
       <input
         type="text"
         value={searchCity}
         onChange={(e) => setSearchCity(e.target.value)}
-        placeholder="Enter a city to add as favorite"
+        placeholder={t('enter_city_favorite_placeholder')}
         className="w-full p-3 mb-4 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
       />
-      {isSearching && <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Searching...</p>}
+      {isSearching && <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">{t('searching_text')}</p>}
 
       {locations.length > 0 && (
         <div className="mt-4 space-y-2 max-h-60 overflow-y-auto">
@@ -114,14 +116,16 @@ export default function AccountFavoritesAddComponent({
                 onClick={() => handleAddClick(location)}
                 className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-1 px-3 rounded transition-colors text-sm"
               >
-                Add
+                {t('add_button')}
               </button>
             </div>
           ))}
         </div>
       )}
       {searchCity && !isSearching && locations.length === 0 && (
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">No results found for &apos;{searchCity}&apos;.</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+          {t('no_results_found_for', { search_city: searchCity })}
+        </p>
       )}
     </div>
   );
