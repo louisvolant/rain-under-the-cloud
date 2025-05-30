@@ -1,8 +1,9 @@
+// src/app/account/page.tsx
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
 import { checkAuth } from '@/lib/login_api';
-import { getFavorites, addFavorite, removeFavorite, deleteAccount } from '@/lib/account_api';
+import { getFavorites, addFavorite, removeFavorite, deleteAccount, updateFavoriteOrder } from '@/lib/account_api'; // Import updateFavoriteOrder
 import { FavoriteLocation, Location } from '@/lib/types';
 import { useRouter } from 'next/navigation';
 import AccountFavoritesListComponent from '@/app/components/AccountFavoritesListComponent';
@@ -33,10 +34,10 @@ export default function Account() {
     if (!isAuthenticated) return;
     try {
       const data = await getFavorites();
-      const uniqueFavorites: FavoriteLocation[] = Array.from(
-        new Map(data.map((item: FavoriteLocation) => [item._id, item])).values()
-      );
-      setFavorites(uniqueFavorites);
+      // Ensure data is sorted by a specific order if it's stored in the backend
+      // For now, we'll assume the backend provides it in the desired order
+      // or we'll establish an order here.
+      setFavorites(data); // Set the favorites directly
     } catch (err) {
       console.error(t('error_fetching_favorites'), err);
     }
@@ -73,6 +74,37 @@ export default function Account() {
     }
   };
 
+  const handleReorderFavorite = async (id: string, direction: 'up' | 'down') => {
+    const newFavorites = [...favorites];
+    const index = newFavorites.findIndex((fav) => fav._id === id);
+
+    if (index === -1) return;
+
+    if (direction === 'up' && index > 0) {
+      [newFavorites[index - 1], newFavorites[index]] = [newFavorites[index], newFavorites[index - 1]];
+    } else if (direction === 'down' && index < newFavorites.length - 1) {
+      [newFavorites[index + 1], newFavorites[index]] = [newFavorites[index], newFavorites[index + 1]];
+    } else {
+      return; // No change needed
+    }
+
+    setFavorites(newFavorites); // Optimistically update UI
+
+    try {
+      // Send the entire reordered list of IDs to the backend
+      const favoriteIdsInOrder = newFavorites.map(fav => fav._id);
+      await updateFavoriteOrder(favoriteIdsInOrder);
+      // If the backend returns the updated list, you can set it here
+      // setFavorites(backendUpdatedFavorites);
+    } catch (error) {
+      console.error('Error reordering favorite:', error);
+      alert(t('failed_to_reorder_favorite'));
+      // If an error occurs, revert to the previous state or refetch
+      fetchFavorites();
+    }
+  };
+
+
   const handleDeleteAccount = async () => {
     if (!confirm(t('confirm_delete_account'))) {
       return;
@@ -102,6 +134,7 @@ export default function Account() {
       <AccountFavoritesListComponent
         favorites={favorites}
         onRemoveFavorite={handleRemoveFavorite}
+        onReorderFavorite={handleReorderFavorite} // Pass the new handler
       />
 
       <AccountFavoritesAddComponent

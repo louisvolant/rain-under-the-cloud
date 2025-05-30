@@ -31,6 +31,11 @@ export const removeFavorite = async (id: string) => {
   return response.data;
 }
 
+export const updateFavoriteOrder = async (orderedFavoriteIds: string[]) => {
+  const response = await api.post('/api/reorder-favorites', { orderedFavoriteIds }, { withCredentials: true });
+  return response.data;
+}
+
 export const deleteAccount = async () => {
   const response = await api.post('/api/delete_my_account', {}, { withCredentials: true });
   return response.data;

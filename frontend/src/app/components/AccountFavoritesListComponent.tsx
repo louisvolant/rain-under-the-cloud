@@ -1,16 +1,19 @@
-//src/app/components/AccountFavoritesListComponent.tsx
+// src/app/components/AccountFavoritesListComponent.tsx
 import React from 'react';
 import { FavoriteLocation } from '@/lib/types';
 import { useLanguage } from '@/context/LanguageContext';
+import { ChevronUp, ChevronDown } from 'lucide-react';
 
 interface AccountFavoritesListComponentProps {
   favorites: FavoriteLocation[];
   onRemoveFavorite: (id: string) => void;
+  onReorderFavorite: (id: string, direction: 'up' | 'down') => void;
 }
 
 export default function AccountFavoritesListComponent({
   favorites,
   onRemoveFavorite,
+  onReorderFavorite,
 }: AccountFavoritesListComponentProps) {
   const { t } = useLanguage();
 
@@ -28,10 +31,11 @@ export default function AccountFavoritesListComponent({
                 <th className="py-3 px-4 text-gray-700 dark:text-gray-300 font-medium">{t('latitude_table_header')}</th>
                 <th className="py-3 px-4 text-gray-700 dark:text-gray-300 font-medium">{t('longitude_table_header')}</th>
                 <th className="py-3 px-4 text-gray-700 dark:text-gray-300 font-medium">{t('actions_table_header')}</th>
+                <th className="py-3 px-4 text-gray-700 dark:text-gray-300 font-medium">{t('order_table_header')}</th> {/* New Header */}
               </tr>
             </thead>
             <tbody>
-              {favorites.map((fav) => (
+              {favorites.map((fav, index) => (
                 <tr
                   key={fav._id}
                   className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
@@ -51,6 +55,26 @@ export default function AccountFavoritesListComponent({
                     >
                       {t('remove_button')}
                     </button>
+                  </td>
+                  <td className="py-3 px-4">
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => onReorderFavorite(fav._id, 'up')}
+                        disabled={index === 0} // Disable 'up' for the first item
+                        className={`p-1 rounded ${index === 0 ? 'text-gray-400 dark:text-gray-600 cursor-not-allowed' : 'text-blue-500 hover:bg-gray-200 dark:text-blue-400 dark:hover:bg-gray-700'}`}
+                        title={t('move_up')}
+                      >
+                        <ChevronUp size={20} />
+                      </button>
+                      <button
+                        onClick={() => onReorderFavorite(fav._id, 'down')}
+                        disabled={index === favorites.length - 1} // Disable 'down' for the last item
+                        className={`p-1 rounded ${index === favorites.length - 1 ? 'text-gray-400 dark:text-gray-600 cursor-not-allowed' : 'text-blue-500 hover:bg-gray-200 dark:text-blue-400 dark:hover:bg-gray-700'}`}
+                        title={t('move_down')}
+                      >
+                        <ChevronDown size={20} />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

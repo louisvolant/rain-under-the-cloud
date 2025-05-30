@@ -22,7 +22,8 @@ const userFavoritesSchema = new mongoose.Schema({
   location_name: { type: String, required: true },
   longitude: { type: Number, required: true },
   latitude: { type: Number, required: true },
-  country_code: { type: String, required: true }
+  country_code: { type: String, required: true },
+  order: { type: Number, default: 0 }
 });
 const UserFavoritesModel = mongoose.model('UserFavorites', userFavoritesSchema, 'UserFavorites');
 

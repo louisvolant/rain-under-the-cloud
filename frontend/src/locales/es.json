@@ -78,5 +78,8 @@
   "latitude_table_header": "Latitud",
   "longitude_table_header": "Longitud",
   "actions_table_header": "Acciones",
-  "remove_button": "Eliminar"
+  "remove_button": "Eliminar",
+  "order_table_header": "Orden",
+  "move_up": "Mover arriba",
+  "move_down": "Mover abajo"
 }
