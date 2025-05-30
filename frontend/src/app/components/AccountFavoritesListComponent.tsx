@@ -31,7 +31,7 @@ export default function AccountFavoritesListComponent({
                 <th className="py-3 px-4 text-gray-700 dark:text-gray-300 font-medium">{t('latitude_table_header')}</th>
                 <th className="py-3 px-4 text-gray-700 dark:text-gray-300 font-medium">{t('longitude_table_header')}</th>
                 <th className="py-3 px-4 text-gray-700 dark:text-gray-300 font-medium">{t('actions_table_header')}</th>
-                <th className="py-3 px-4 text-gray-700 dark:text-gray-300 font-medium">{t('order_table_header')}</th> {/* New Header */}
+                <th className="py-3 px-4 text-gray-700 dark:text-gray-300 font-medium">{t('order_table_header')}</th>
               </tr>
             </thead>
             <tbody>
@@ -60,7 +60,7 @@ export default function AccountFavoritesListComponent({
                     <div className="flex space-x-2">
                       <button
                         onClick={() => onReorderFavorite(fav._id, 'up')}
-                        disabled={index === 0} // Disable 'up' for the first item
+                        disabled={index === 0}
                         className={`p-1 rounded ${index === 0 ? 'text-gray-400 dark:text-gray-600 cursor-not-allowed' : 'text-blue-500 hover:bg-gray-200 dark:text-blue-400 dark:hover:bg-gray-700'}`}
                         title={t('move_up')}
                       >
@@ -68,7 +68,7 @@ export default function AccountFavoritesListComponent({
                       </button>
                       <button
                         onClick={() => onReorderFavorite(fav._id, 'down')}
-                        disabled={index === favorites.length - 1} // Disable 'down' for the last item
+                        disabled={index === favorites.length - 1}
                         className={`p-1 rounded ${index === favorites.length - 1 ? 'text-gray-400 dark:text-gray-600 cursor-not-allowed' : 'text-blue-500 hover:bg-gray-200 dark:text-blue-400 dark:hover:bg-gray-700'}`}
                         title={t('move_down')}
                       >
