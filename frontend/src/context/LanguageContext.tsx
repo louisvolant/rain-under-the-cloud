@@ -9,7 +9,7 @@ interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
   t: (key: string, replacements?: Record<string, string | number>) => string;
-  tWeather: (description: string) => string; // The function we are modifying
+  tWeather: (description: string) => string;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
@@ -55,7 +55,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   };
 
   const t = useCallback((key: string, replacements?: Record<string, string | number>): string => {
-    let translatedText = currentTranslations[key] || key; // currentTranslations[key] will be `undefined` if not found
+    let translatedText = currentTranslations[key] || key;
 
     if (replacements) {
       for (const placeholder in replacements) {
@@ -67,20 +67,21 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     return translatedText;
   }, [currentTranslations]);
 
-  // Modified 'tWeather' function
   const tWeather = useCallback((description: string): string => {
     // 1. Generate the translation key from the description
     const key = `weather_${description.toLowerCase().replace(/ /g, '_')}`;
-
     // 2. Try to get the translation using the 't' function
-    const translatedValue = t(key); // This will return 'key' itself if no translation is found
+    // This will return 'key' itself if no translation is found
+    const translatedValue = t(key);
 
     // 3. Check if the 't' function returned the key itself (meaning no translation was found for this key)
     // If it's the key, return the original description; otherwise, return the translated value.
     if (translatedValue === key) {
-      return description; // Fallback to original OpenWeatherMap description
+      // Fallback to original OpenWeatherMap description
+      return description;
     } else {
-      return translatedValue; // Return the found translation
+      // Return the found translation
+      return translatedValue;
     }
   }, [t]);
 
