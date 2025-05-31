@@ -44,15 +44,16 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     initializeLanguage();
   }, []);
 
-  const setLanguage = async (lang: Language) => {
-    if (language === lang) return;
+  // Wrap setLanguage in useCallback to avoid infinite calls
+  const setLanguage = useCallback(async (lang: Language) => {
+    if (language === lang) return; // 'language' is a dependency here
     setIsLoadingTranslations(true);
-    setLanguageState(lang);
+    setLanguageState(lang); // 'setLanguageState' is a stable setter
     localStorage.setItem('language', lang);
-    const translations = await loadTranslations(lang);
-    setCurrentTranslations(translations);
-    setIsLoadingTranslations(false);
-  };
+    const translations = await loadTranslations(lang); // 'loadTranslations' is defined outside, so it's stable
+    setCurrentTranslations(translations); // 'setCurrentTranslations' is a stable setter
+    setIsLoadingTranslations(false); // 'setIsLoadingTranslations' is a stable setter
+  }, [language, setLanguageState, setCurrentTranslations, setIsLoadingTranslations]); // Dependencies for setLanguage
 
   const t = useCallback((key: string, replacements?: Record<string, string | number>): string => {
     let translatedText = currentTranslations[key] || key;
@@ -87,10 +88,10 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   const contextValue = useMemo(() => ({
     language,
-    setLanguage,
+    setLanguage, // Now stable
     t,
     tWeather,
-  }), [language, setLanguage, t, tWeather]);
+  }), [language, setLanguage, t, tWeather]); // setLanguage is now a stable dependency
 
   if (isLoadingTranslations) {
     return null;
