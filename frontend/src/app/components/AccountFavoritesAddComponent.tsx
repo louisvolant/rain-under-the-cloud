@@ -1,8 +1,9 @@
-//src/app/components/AccountFavoritesAddComponent.tsx
+// src/app/components/AccountFavoritesAddComponent.tsx
 import React, { useState, useEffect, useCallback } from 'react';
 import { search, getDistance } from '@/lib/weather_api';
 import { Location } from '@/lib/types';
 import { useLanguage } from '@/context/LanguageContext';
+import { Loader2 } from 'lucide-react';
 
 interface AccountFavoritesAddComponentProps {
   onAddFavorite: (location: Location) => void;
@@ -17,6 +18,7 @@ export default function AccountFavoritesAddComponent({
   const { t } = useLanguage();
 
   const handleSearch = useCallback(async () => {
+    // Only perform search if there's actual input
     if (!searchCity.trim()) {
       setLocations([]);
       return;
@@ -69,6 +71,8 @@ export default function AccountFavoritesAddComponent({
     }
   }, [searchCity]);
 
+  // We keep the debounce for automatic search on input change,
+  // but the button will trigger handleSearch directly.
   useEffect(() => {
     if (!searchCity.trim()) {
       setLocations([]);
@@ -76,10 +80,16 @@ export default function AccountFavoritesAddComponent({
     }
     const debounceTimer = setTimeout(() => {
       handleSearch();
-    }, 1000);
+    }, 1000); // Debounce for 1 second
 
     return () => clearTimeout(debounceTimer);
   }, [searchCity, handleSearch]);
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
 
   const handleAddClick = (location: Location) => {
     onAddFavorite(location);
@@ -90,14 +100,32 @@ export default function AccountFavoritesAddComponent({
   return (
     <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md p-6 mb-8">
       <h2 className="text-2xl font-semibold text-blue-600 dark:text-blue-400 mb-4">{t('add_new_favorite_title')}</h2>
-      <input
-        type="text"
-        value={searchCity}
-        onChange={(e) => setSearchCity(e.target.value)}
-        placeholder={t('enter_city_favorite_placeholder')}
-        className="w-full p-3 mb-4 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-      />
-      {isSearching && <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">{t('searching_text')}</p>}
+      <div className="flex flex-col sm:flex-row gap-4 mb-4"> {/* Use flexbox for input and button */}
+        <input
+          type="text"
+          value={searchCity}
+          onChange={(e) => setSearchCity(e.target.value)}
+          onKeyDown={handleKeyDown} // Keep Enter key functionality
+          placeholder={t('enter_city_favorite_placeholder')}
+          className="flex-grow p-3 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+        />
+        <button
+          onClick={handleSearch} // Trigger search on button click
+          disabled={isSearching || !searchCity.trim()} // Disable if searching or input is empty
+          className={`flex-shrink-0 p-3 bg-blue-500 text-white rounded-md hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 flex items-center justify-center transition-colors ${
+            isSearching || !searchCity.trim() ? 'opacity-75 cursor-not-allowed' : ''
+          }`}
+        >
+          {isSearching ? (
+            <>
+              <Loader2 className="w-5 h-5 animate-spin mr-2" /> {/* Example loading icon */}
+              {t('searching_text')}
+            </>
+          ) : (
+            t('search_button') // Assuming you have a 'search_button' translation key
+          )}
+        </button>
+      </div>
 
       {locations.length > 0 && (
         <div className="mt-4 space-y-2 max-h-60 overflow-y-auto">
