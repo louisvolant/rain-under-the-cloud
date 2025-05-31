@@ -1,19 +1,19 @@
-//src/context/LanguageContext.tsx
+// src/context/LanguageContext.tsx
 'use client';
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode, useCallback, useMemo } from 'react';
 
-type Language = 'en' | 'fr' | 'es'; // Define your supported languages
+type Language = 'en' | 'fr' | 'es';
 
 interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
-  t: (key: string, replacements?: Record<string, string | number>) => string; // Translation function with optional replacements
+  t: (key: string, replacements?: Record<string, string | number>) => string;
+  tWeather: (description: string) => string; // The function we are modifying
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
-// Define a type for your translation modules
 type TranslationModule = { default: Record<string, string> };
 
 const loadTranslations = async (lang: Language): Promise<Record<string, string>> => {
@@ -22,14 +22,13 @@ const loadTranslations = async (lang: Language): Promise<Record<string, string>>
     return mod.default;
   } catch (error) {
     console.error(`Failed to load translations for ${lang}:`, error);
-    // Fallback to English if loading fails
     const defaultMod = await import(`@/locales/en.json`) as TranslationModule;
     return defaultMod.default;
   }
 };
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguageState] = useState<Language>('en'); // Default to English
+  const [language, setLanguageState] = useState<Language>('en');
   const [currentTranslations, setCurrentTranslations] = useState<Record<string, string>>({});
   const [isLoadingTranslations, setIsLoadingTranslations] = useState(true);
 
@@ -46,7 +45,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const setLanguage = async (lang: Language) => {
-    if (language === lang) return; // Avoid re-loading if already set
+    if (language === lang) return;
     setIsLoadingTranslations(true);
     setLanguageState(lang);
     localStorage.setItem('language', lang);
@@ -55,8 +54,8 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     setIsLoadingTranslations(false);
   };
 
-  const t = (key: string, replacements?: Record<string, string | number>): string => {
-    let translatedText = currentTranslations[key] || key; // Fallback to key if not found
+  const t = useCallback((key: string, replacements?: Record<string, string | number>): string => {
+    let translatedText = currentTranslations[key] || key; // currentTranslations[key] will be `undefined` if not found
 
     if (replacements) {
       for (const placeholder in replacements) {
@@ -66,15 +65,38 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
       }
     }
     return translatedText;
-  };
+  }, [currentTranslations]);
+
+  // Modified 'tWeather' function
+  const tWeather = useCallback((description: string): string => {
+    // 1. Generate the translation key from the description
+    const key = `weather_${description.toLowerCase().replace(/ /g, '_')}`;
+
+    // 2. Try to get the translation using the 't' function
+    const translatedValue = t(key); // This will return 'key' itself if no translation is found
+
+    // 3. Check if the 't' function returned the key itself (meaning no translation was found for this key)
+    // If it's the key, return the original description; otherwise, return the translated value.
+    if (translatedValue === key) {
+      return description; // Fallback to original OpenWeatherMap description
+    } else {
+      return translatedValue; // Return the found translation
+    }
+  }, [t]);
+
+  const contextValue = useMemo(() => ({
+    language,
+    setLanguage,
+    t,
+    tWeather,
+  }), [language, setLanguage, t, tWeather]);
 
   if (isLoadingTranslations) {
-    // Optionally render a loading spinner or null while translations are loading
     return null;
   }
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+    <LanguageContext.Provider value={contextValue}>
       {children}
     </LanguageContext.Provider>
   );

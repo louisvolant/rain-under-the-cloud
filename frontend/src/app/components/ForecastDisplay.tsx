@@ -16,7 +16,7 @@ interface ForecastDisplayProps {
 
 export default function ForecastDisplay({ weatherData, forecastData, setForecastData, setError }: ForecastDisplayProps) {
   const { darkMode } = useTheme();
-  const { language, t } = useLanguage();
+  const { language, t, tWeather } = useLanguage();
 
   const handleShowForecast = useCallback(async () => {
     if (!weatherData) return;
@@ -30,7 +30,6 @@ export default function ForecastDisplay({ weatherData, forecastData, setForecast
   }, [weatherData, setForecastData, setError, t]);
 
   const getOrdinalSuffix = (day: number): string => {
-    // This function might need locale-specific adjustments for other languages
     if (language === 'en') {
       if (day >= 11 && day <= 13) return 'th';
       switch (day % 10) {
@@ -40,32 +39,31 @@ export default function ForecastDisplay({ weatherData, forecastData, setForecast
         default: return 'th';
       }
     }
-    return ''; // No suffix for other languages or handle specifically if needed
+    return '';
   };
 
-    const formatDateDisplay = (date: Date, currentDate: Date): string => {
-      const today = new Date(currentDate.setHours(0, 0, 0, 0));
-      const forecastDate = new Date(date.setHours(0, 0, 0, 0));
-      const tomorrow = new Date(today);
-      tomorrow.setDate(today.getDate() + 1);
+  const formatDateDisplay = (date: Date, currentDate: Date): string => {
+    const today = new Date(currentDate.setHours(0, 0, 0, 0));
+    const forecastDate = new Date(date.setHours(0, 0, 0, 0));
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
 
-      const currentHour = currentDate.getHours();
+    const currentHour = currentDate.getHours();
 
-      if (forecastDate.getTime() === today.getTime()) {
-        return currentHour >= 18 ? t('tonight_forecast') : t('today_forecast');
-      } else if (forecastDate.getTime() === tomorrow.getTime()) {
-        return t('tomorrow_forecast');
-      } else {
-        const dayName = date.toLocaleDateString(language === 'en' ? 'en-US' : (language === 'fr' ? 'fr-FR' : 'es-ES'), { weekday: 'long' });
-        const day = date.getDate();
-        const month = date.toLocaleDateString(language === 'en' ? 'en-US' : (language === 'fr' ? 'fr-FR' : 'es-ES'), { month: 'long' });
-        return `${dayName} ${day}${getOrdinalSuffix(day)} ${month}`;
-      }
-    };
+    if (forecastDate.getTime() === today.getTime()) {
+      return currentHour >= 18 ? t('tonight_forecast') : t('today_forecast');
+    } else if (forecastDate.getTime() === tomorrow.getTime()) {
+      return t('tomorrow_forecast');
+    } else {
+      const dayName = date.toLocaleDateString(language === 'en' ? 'en-US' : (language === 'fr' ? 'fr-FR' : 'es-ES'), { weekday: 'long' });
+      const day = date.getDate();
+      const month = date.toLocaleDateString(language === 'en' ? 'en-US' : (language === 'fr' ? 'fr-FR' : 'es-ES'), { month: 'long' });
+      return `${dayName} ${day}${getOrdinalSuffix(day)} ${month}`;
+    }
+  };
 
 
   const groupForecastByDay = (forecast: ForecastData) => {
-    // Current time needs to be dynamic, not hardcoded for '2025-05-18T18:30:00+02:00'
     const currentDate = new Date();
     const grouped: { [key: string]: { dt: number; main: { temp: number }; weather: { description: string; icon: string }[] }[] } = {};
     const dateLabels: { [key: string]: string } = {};
@@ -131,7 +129,9 @@ export default function ForecastDisplay({ weatherData, forecastData, setForecast
                               </div>
 
                               <span className="text-xs font-medium mb-1">{item.main.temp.toFixed(1)}°C</span>
-                              <span className="text-[10px] text-center capitalize">{item.weather[0].description}</span>
+                              <span className="text-[10px] text-center capitalize">
+                                {tWeather(item.weather[0].description)}
+                              </span>
                             </div>
                         );
                       })}
