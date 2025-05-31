@@ -170,53 +170,71 @@ router.post('/reorder-favorites', async (req, res) => {
   }
 });
 
-
 // Default number of cached favorites to show
 const DEFAULT_CACHED_FAVORITES = 3;
-
 
 // Get cached favorites of all users (deduplicated, max 3)
 router.get('/cached-favorites', async (req, res) => {
   try {
-    // Fetch all favorites, sorted by order
-    const allFavorites = await UserFavoritesModel.find({}).sort({ order: 1 });
+    const cachedFavoritesPipeline = [
+      // 1. Group by location (name, lat, lon, country_code) to find unique locations
+      //    We use $first to pick the 'order' from the first document encountered in each group.
+      //    Since we sort by order ascending later, this will effectively pick the lowest order.
+      {
+        $group: {
+          _id: {
+            location_name: "$location_name",
+            latitude: "$latitude",
+            longitude: "$longitude",
+            country_code: "$country_code",
+          },
+          // Find the minimum order for this unique location
+          minOrder: { $min: "$order" },
+          // Keep one example of the full favorite document to extract other fields later
+          // $first or $push could be used, but $first is simpler if we just need the values.
+          // Note: If multiple users have the same location with the same minOrder, this picks one arbitrarily.
+          // For simplicity, we just use the grouped fields directly for the final output.
+        },
+      },
+      // 2. Project to reshape the output and include the minimum order
+      {
+        $project: {
+          _id: 0, // Exclude the _id from the output
+          location_name: "$_id.location_name",
+          latitude: "$_id.latitude",
+          longitude: "$_id.longitude",
+          country_code: "$_id.country_code",
+          order: "$minOrder", // This is the lowest order found for this specific location
+        },
+      },
+      // 3. Sort by the minimum order to get the "most preferred" locations first
+      {
+        $sort: { order: 1 },
+      },
+      // 4. Limit to the desired number of top cached favorites
+      {
+        $limit: DEFAULT_CACHED_FAVORITES,
+      },
+    ];
 
-    if (!allFavorites || allFavorites.length === 0) {
-      logger.info('No cached favorites found.');
+    const topCachedFavorites = await UserFavoritesModel.aggregate(cachedFavoritesPipeline);
+
+    if (!topCachedFavorites || topCachedFavorites.length === 0) {
+      logger.info('No cached favorites found after aggregation.');
       return res.json([]);
     }
 
-    const uniqueFavorites = Array.from(
-      new Map(
-        allFavorites.map((fav) => [
-          `${fav.latitude},${fav.longitude}`, // De-duplication key
-          {
-            location_name: fav.location_name,
-            latitude: fav.latitude,
-            longitude: fav.longitude,
-            country_code: fav.country_code,
-            order: fav.order, // Include order in the unique map
-          },
-        ])
-      ).values()
-    );
+    // Map the aggregated results to the desired frontend format
+    const formattedFavorites = topCachedFavorites.map((fav) => ({
+      location_name: fav.location_name,
+      lat: fav.latitude,
+      lon: fav.longitude,
+      country: fav.country_code,
+    }));
 
-    // Sort unique favorites by order if the de-duplication changes the order
-    uniqueFavorites.sort((a, b) => a.order - b.order);
-
-
-    const cachedFavorites = uniqueFavorites
-      .slice(0, DEFAULT_CACHED_FAVORITES)
-      .map((fav) => ({
-        location_name: fav.location_name,
-        lat: fav.latitude,
-        lon: fav.longitude,
-        country: fav.country_code
-      }));
-
-    res.json(cachedFavorites);
+    res.json(formattedFavorites);
   } catch (err) {
-    logger.error('Error fetching cached favorites:', err);
+    logger.error('Error fetching cached favorites with aggregation:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
