@@ -1,9 +1,9 @@
 // src/components/GraphsDisplay.tsx
 'use client';
 
-import { ChangeEvent, useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts';
-import { PrecipitationData, WeatherData } from '@/lib/types';
+import { PrecipitationData, WeatherData, DailySummaryApiResponse } from '@/lib/types'; // Import DailySummaryApiResponse
 import { useTheme } from './ThemeProvider';
 import { useLanguage } from '@/context/LanguageContext';
 import { getOneCallMonthSummary } from '@/lib/weather_api';
@@ -60,7 +60,8 @@ export default function GraphsDisplay({
       const year = currentMonthDate.getFullYear();
       const month = currentMonthDate.getMonth() + 1; // getMonth() is 0-indexed
 
-      const responses = await getOneCallMonthSummary(
+      // Type the responses array correctly
+      const responses: DailySummaryApiResponse[] = await getOneCallMonthSummary(
         weatherData.coord.lat.toString(),
         weatherData.coord.lon.toString(),
         year,
@@ -68,7 +69,7 @@ export default function GraphsDisplay({
       );
 
       // Transform data: responses is an array of daily summaries
-      const transformedData = responses.map((response: any) => ({
+      const transformedData: PrecipitationData[] = responses.map((response: DailySummaryApiResponse) => ({ // Use correct type here
         date: new Date(response.date).toLocaleDateString(t('locale_code'), { day: 'numeric', month: 'short' }), // Format date for XAxis
         precipitation: response.precipitation?.total || 0,
         humidity: response.humidity?.afternoon || 0,
@@ -76,7 +77,11 @@ export default function GraphsDisplay({
       }));
 
       // Sort by date to ensure correct graph display
-      transformedData.sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      transformedData.sort((a: PrecipitationData, b: PrecipitationData) => { // Use correct types here
+        const dateA = new Date(a.date.split('/').reverse().join('-')).getTime(); // Adjust for potential date format
+        const dateB = new Date(b.date.split('/').reverse().join('-')).getTime();
+        return dateA - dateB;
+      });
 
 
       setPrecipitationData(transformedData);
@@ -162,12 +167,7 @@ export default function GraphsDisplay({
     </ResponsiveContainer>
   );
 
-  // Helper to ensure 'locale_code' is available in translations
-  // Add these to your locale JSONs (e.g., en.json: "locale_code": "en-US", fr.json: "locale_code": "fr-FR")
-  const getLocaleForDateFormatting = () => {
-    const localeCode = t('locale_code');
-    return localeCode === 'locale_code' ? 'en-US' : localeCode; // Fallback if not translated
-  };
+  // getLocaleForDateFormatting removed as it's no longer used
 
   return (
     <div className="mt-4">

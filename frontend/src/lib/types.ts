@@ -63,3 +63,16 @@ export interface ForecastData {
     }[];
   }[];
 }
+
+export interface DailySummaryApiResponse {
+  date: string;
+  precipitation?: {
+    total: number;
+  };
+  humidity?: {
+    afternoon: number;
+  };
+  cloud_cover?: {
+    afternoon: number;
+  };
+}
