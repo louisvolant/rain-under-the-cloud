@@ -143,5 +143,7 @@
   "no_data_for_month": "No data available for this month.",
   "precipitation": "Precipitation",
   "humidity": "Humidity",
-  "cloud_cover": "Cloud Cover"
+  "cloud_cover": "Cloud Cover",
+  "weather_rain": "Rain",
+  "numDays": "Number of days"
 }

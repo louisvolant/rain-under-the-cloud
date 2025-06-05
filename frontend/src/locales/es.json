@@ -83,7 +83,7 @@
   "move_up": "Mover arriba",
   "move_down": "Mover abajo",
   "weather_clear_sky": "Cielo despejado",
-  "weather_broken_clouds": "Nubes dispersas",
+  "weather_broken_clouds": "Nubes fragmentadas",
   "weather_scattered_clouds": "Nubes dispersas",
   "weather_few_clouds": "Pocas nubes",
   "weather_light_rain": "Lluvia ligera",
@@ -143,5 +143,7 @@
   "no_data_for_month": "No hay datos disponibles para este mes.",
   "precipitation": "Precipitación",
   "humidity": "Humedad",
-  "cloud_cover": "Nubosidad"
+  "cloud_cover": "Nubosidad",
+  "weather_rain": "Lluvia",
+  "numDays": "Número de días"
 }
