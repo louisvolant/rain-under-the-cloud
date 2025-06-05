@@ -1,7 +1,7 @@
 // src/components/GraphsDisplay.tsx
 'use client';
 
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { PrecipitationData, WeatherData, DailySummaryApiResponse } from '@/lib/types'; // Import DailySummaryApiResponse
 import { useTheme } from './ThemeProvider';
@@ -94,10 +94,6 @@ export default function GraphsDisplay({
       setIsLoadingPrecipitation(false);
     }
   }, [weatherData, currentMonthDate, setPrecipitationData, setIsLoadingPrecipitation, setShowGraphs, setError, t]);
-
-  useEffect(() => {
-    fetchMonthData();
-  }, [fetchMonthData]); // Re-fetch when fetchMonthData (and thus currentMonthDate/weatherData) changes
 
   const handlePreviousMonth = () => {
     setCurrentMonthDate((prevDate) => {
