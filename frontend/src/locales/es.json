@@ -136,5 +136,12 @@
   "weather_squalls": "Borrascas",
   "weather_sand": "Arena",
   "weather_dust": "Polvo",
-  "weather_ash": "Ceniza"
+  "weather_ash": "Ceniza",
+  "locale_code": "es-ES",
+  "view_month_data": "Ver Datos Mensuales",
+  "failed_to_fetch_precipitation_month": "Error al obtener datos de precipitación mensuales.",
+  "no_data_for_month": "No hay datos disponibles para este mes.",
+  "precipitation": "Precipitación",
+  "humidity": "Humedad",
+  "cloud_cover": "Nubosidad"
 }

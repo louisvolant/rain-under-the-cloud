@@ -90,6 +90,12 @@ export const getOneCallDaySummary = async (latitude: string, longitude: string, 
   return response.data;
 };
 
+export const getOneCallMonthSummary = async (latitude: string, longitude: string, year: number, month: number) => {
+  const url = `/api/onecallmonthsummary?lat=${latitude}&lon=${longitude}&year=${year}&month=${month}`;
+  const response = await api.get(url);
+  return response.data;
+};
+
 export const fetchCachedFavorites = async () => {
   try {
     const response = await api.get('/api/cached-favorites');

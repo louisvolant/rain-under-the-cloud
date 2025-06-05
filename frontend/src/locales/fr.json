@@ -136,5 +136,12 @@
   "weather_squalls": "Bourrasques",
   "weather_sand": "Sable",
   "weather_dust": "Poussière",
-  "weather_ash": "Cendres"
+  "weather_ash": "Cendres",
+  "locale_code": "fr-FR",
+  "view_month_data": "Voir les Données Mensuelles",
+  "failed_to_fetch_precipitation_month": "Échec de la récupération des données de précipitations mensuelles.",
+  "no_data_for_month": "Aucune donnée disponible pour ce mois.",
+  "precipitation": "Précipitations",
+  "humidity": "Humidité",
+  "cloud_cover": "Couverture Nuageuse"
 }

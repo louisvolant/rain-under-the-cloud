@@ -136,5 +136,12 @@
   "weather_squalls": "Squalls",
   "weather_sand": "Sand",
   "weather_dust": "Dust",
-  "weather_ash": "Ash"
+  "weather_ash": "Ash",
+  "locale_code": "en-US",
+  "view_month_data": "View Monthly Data",
+  "failed_to_fetch_precipitation_month": "Failed to fetch monthly precipitation data.",
+  "no_data_for_month": "No data available for this month.",
+  "precipitation": "Precipitation",
+  "humidity": "Humidity",
+  "cloud_cover": "Cloud Cover"
 }

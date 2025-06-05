@@ -10,11 +10,9 @@ import GraphsDisplay from './components/GraphsDisplay';
 import SearchDisplay from './components/SearchDisplay';
 import { useLanguage } from '@/context/LanguageContext';
 
-const DEFAULT_DAYS = 3;
 const LOCAL_STORAGE_KEY = 'cachedFavorites';
 
 export default function Home() {
-  const [numDays, setNumDays] = useState<number | string>(DEFAULT_DAYS);
   const [city, setCity] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
@@ -131,10 +129,7 @@ export default function Home() {
             setIsLoadingPrecipitation={setIsLoadingPrecipitation}
             showGraphs={showGraphs}
             setShowGraphs={setShowGraphs}
-            numDays={numDays}
-            setNumDays={setNumDays}
             setError={setError}
-            defaultDays={DEFAULT_DAYS}
           />
         )}
       </div>
