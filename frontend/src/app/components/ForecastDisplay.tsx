@@ -100,7 +100,7 @@ export default function ForecastDisplay({ weatherData, forecastData, setForecast
       </button>
 
       {forecastData && (
-        <div className={`p-6 rounded-lg shadow-md mb-4 ${darkMode ? 'bg-green-800' : 'bg-green-50'} text-gray-950 dark:text-gray-100`}>
+        <div className={`p-6 rounded-lg shadow-md mb-4 ${darkMode ? 'bg-gray-900' : 'bg-green-50'} text-gray-950 dark:text-gray-100`}>
           <h2 className="text-2xl font-semibold mb-3">{t('weather_forecast_title')}</h2>
           <div className="flex flex-col gap-6">
             {(() => {
@@ -120,7 +120,7 @@ export default function ForecastDisplay({ weatherData, forecastData, setForecast
                             >
                               <span className="text-xs font-medium mb-1">{new Date(item.dt * 1000).getHours()}h</span>
 
-                              <div className={`flex-shrink-0 rounded-full p-1 mb-1 ${darkMode ? 'bg-gray-700' : 'bg-white'}`}>
+                              <div className={`flex-shrink-0 rounded-full p-1 mb-1 ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
                                     <i
                                       className={`wi ${weatherIconMap[item.weather[0].icon]} text-3xl ${
                                         weatherIconColorMap[item.weather[0].icon]

@@ -49,3 +49,4 @@ node_modules/
 dist/
 build/
 .cache/
+/concatenated_codebase.txt
