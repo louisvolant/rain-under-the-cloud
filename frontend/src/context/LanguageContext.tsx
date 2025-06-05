@@ -44,16 +44,15 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     initializeLanguage();
   }, []);
 
-  // Wrap setLanguage in useCallback to avoid infinite calls
   const setLanguage = useCallback(async (lang: Language) => {
-    if (language === lang) return; // 'language' is a dependency here
-    setIsLoadingTranslations(true);
-    setLanguageState(lang); // 'setLanguageState' is a stable setter
+    if (language === lang) return;
+    setIsLoadingTranslations(true); // Still set this, but it won't unmount children
+    setLanguageState(lang);
     localStorage.setItem('language', lang);
-    const translations = await loadTranslations(lang); // 'loadTranslations' is defined outside, so it's stable
-    setCurrentTranslations(translations); // 'setCurrentTranslations' is a stable setter
-    setIsLoadingTranslations(false); // 'setIsLoadingTranslations' is a stable setter
-  }, [language, setLanguageState, setCurrentTranslations, setIsLoadingTranslations]); // Dependencies for setLanguage
+    const translations = await loadTranslations(lang);
+    setCurrentTranslations(translations);
+    setIsLoadingTranslations(false);
+  }, [language]); // Simplified dependencies
 
   const t = useCallback((key: string, replacements?: Record<string, string | number>): string => {
     let translatedText = currentTranslations[key] || key;
@@ -69,33 +68,22 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   }, [currentTranslations]);
 
   const tWeather = useCallback((description: string): string => {
-    // 1. Generate the translation key from the description
     const key = `weather_${description.toLowerCase().replace(/ /g, '_')}`;
-    // 2. Try to get the translation using the 't' function
-    // This will return 'key' itself if no translation is found
     const translatedValue = t(key);
 
-    // 3. Check if the 't' function returned the key itself (meaning no translation was found for this key)
-    // If it's the key, return the original description; otherwise, return the translated value.
     if (translatedValue === key) {
-      // Fallback to original OpenWeatherMap description
       return description;
     } else {
-      // Return the found translation
       return translatedValue;
     }
   }, [t]);
 
   const contextValue = useMemo(() => ({
     language,
-    setLanguage, // Now stable
+    setLanguage,
     t,
     tWeather,
-  }), [language, setLanguage, t, tWeather]); // setLanguage is now a stable dependency
-
-  if (isLoadingTranslations) {
-    return null;
-  }
+  }), [language, setLanguage, t, tWeather]);
 
   return (
     <LanguageContext.Provider value={contextValue}>
