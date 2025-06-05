@@ -17,11 +17,10 @@
   "failed_to_fetch_forecast": "Failed to fetch forecast",
   "weather_forecast_title": "Weather Forecast",
   "number_of_days": "Number of days:",
-  "view_precipitation_button": "View last {numDays} days of precipitation",
   "failed_to_fetch_precipitation": "Failed to fetch precipitation data",
-  "precipitation_chart_title": "Precipitation (last {numDays} days)",
-  "humidity_chart_title": "Humidity (last {numDays} days)",
-  "cloud_cover_chart_title": "Cloud Cover (last {numDays} days)",
+  "precipitation_chart_title": "Monthly Precipitation",
+  "humidity_chart_title": "Monthly Humidity",
+  "cloud_cover_chart_title": "Monthly Cloud Cover",
   "today_forecast": "This afternoon",
   "tonight_forecast": "Tonight",
   "tomorrow_forecast": "Tomorrow",
@@ -144,6 +143,5 @@
   "precipitation": "Precipitation",
   "humidity": "Humidity",
   "cloud_cover": "Cloud Cover",
-  "weather_rain": "Rain",
-  "numDays": "Number of days"
+  "weather_rain": "Rain"
 }

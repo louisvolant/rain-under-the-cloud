@@ -17,11 +17,10 @@
   "failed_to_fetch_forecast": "Error al buscar pronóstico",
   "weather_forecast_title": "Pronóstico del Tiempo",
   "number_of_days": "Número de días:",
-  "view_precipitation_button": "Ver precipitaciones de los últimos {numDays} días",
   "failed_to_fetch_precipitation": "Error al buscar datos de precipitación",
-  "precipitation_chart_title": "Precipitación (últimos {numDays} días)",
-  "humidity_chart_title": "Humedad (últimos {numDays} días)",
-  "cloud_cover_chart_title": "Nubosidad (últimos {numDays} días)",
+  "precipitation_chart_title": "Precipitación mensual",
+  "humidity_chart_title": "Humedad mensual",
+  "cloud_cover_chart_title": "Nubosidad mensual",
   "today_forecast": "Esta tarde",
   "tonight_forecast": "Esta noche",
   "tomorrow_forecast": "Mañana",
@@ -144,6 +143,5 @@
   "precipitation": "Precipitación",
   "humidity": "Humedad",
   "cloud_cover": "Nubosidad",
-  "weather_rain": "Lluvia",
-  "numDays": "Número de días"
+  "weather_rain": "Lluvia"
 }

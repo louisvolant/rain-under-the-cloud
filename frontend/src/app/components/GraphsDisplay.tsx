@@ -188,16 +188,18 @@ export default function GraphsDisplay({
         </button>
       </div>
 
-      {/* Button to show graphs (or remove if graphs are always shown) */}
-      <button
-        onClick={() => fetchMonthData()} // Re-fetch explicitly if needed, or rely on useEffect
-        className={`w-full p-2 mb-4 bg-blue-500 text-white rounded hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 ${
-          !weatherData ? 'opacity-75 cursor-not-allowed' : ''
-        }`}
-        disabled={!weatherData || isLoadingPrecipitation}
-      >
-        {t('view_month_data')}
-      </button>
+      {/* Button to show graphs, hidden if graphs are already shown and data exists */}
+      {!showGraphs && precipitationData.length === 0 && (
+        <button
+          onClick={fetchMonthData} // Call fetchMonthData directly on click
+          className={`w-full p-2 mb-4 bg-blue-500 text-white rounded hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 ${
+            !weatherData ? 'opacity-75 cursor-not-allowed' : ''
+          }`}
+          disabled={!weatherData || isLoadingPrecipitation}
+        >
+          {t('view_month_data')}
+        </button>
+      )}
 
       {showGraphs && (
         <div>
