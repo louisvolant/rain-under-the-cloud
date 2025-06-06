@@ -1,9 +1,9 @@
 // src/components/GraphsDisplay.tsx
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts';
-import { PrecipitationData, WeatherData, DailySummaryApiResponse } from '@/lib/types'; // Import DailySummaryApiResponse
+import { PrecipitationData, WeatherData, DailySummaryApiResponse } from '@/lib/types';
 import { useTheme } from './ThemeProvider';
 import { useLanguage } from '@/context/LanguageContext';
 import { getOneCallMonthSummary } from '@/lib/weather_api';
@@ -34,20 +34,17 @@ export default function GraphsDisplay({
   const { t } = useLanguage();
 
   const [currentMonthDate, setCurrentMonthDate] = useState<Date>(() => {
-    // Initialize to the first day of the current month
     const today = new Date();
     return new Date(today.getFullYear(), today.getMonth(), 1);
   });
 
-  // Function to format the month for display
   const getDisplayMonth = useCallback((date: Date) => {
     return date.toLocaleDateString(t('locale_code'), { year: 'numeric', month: 'long' });
-  }, [t]); // Depend on 't' to re-render if language changes
+  }, [t]);
 
-  // Fetch data when weatherData or currentMonthDate changes
   const fetchMonthData = useCallback(async () => {
     if (!weatherData) {
-      setPrecipitationData([]); // Clear data if no location selected
+      setPrecipitationData([]);
       setShowGraphs(false);
       return;
     }
@@ -58,9 +55,8 @@ export default function GraphsDisplay({
       setError(null);
 
       const year = currentMonthDate.getFullYear();
-      const month = currentMonthDate.getMonth() + 1; // getMonth() is 0-indexed
+      const month = currentMonthDate.getMonth() + 1;
 
-      // Type the responses array correctly
       const responses: DailySummaryApiResponse[] = await getOneCallMonthSummary(
         weatherData.coord.lat.toString(),
         weatherData.coord.lon.toString(),
@@ -68,32 +64,41 @@ export default function GraphsDisplay({
         month
       );
 
-      // Transform data: responses is an array of daily summaries
-      const transformedData: PrecipitationData[] = responses.map((response: DailySummaryApiResponse) => ({ // Use correct type here
-        date: new Date(response.date).toLocaleDateString(t('locale_code'), { day: 'numeric', month: 'short' }), // Format date for XAxis
+      const transformedData: PrecipitationData[] = responses.map((response: DailySummaryApiResponse) => ({
+        date: new Date(response.date).toLocaleDateString(t('locale_code'), { day: 'numeric', month: 'short' }),
         precipitation: response.precipitation?.total || 0,
         humidity: response.humidity?.afternoon || 0,
         cloudCover: response.cloud_cover?.afternoon || 0,
       }));
 
-      // Sort by date to ensure correct graph display
-      transformedData.sort((a: PrecipitationData, b: PrecipitationData) => { // Use correct types here
-        const dateA = new Date(a.date.split('/').reverse().join('-')).getTime(); // Adjust for potential date format
-        const dateB = new Date(b.date.split('/').reverse().join('-')).getTime();
+      transformedData.sort((a: PrecipitationData, b: PrecipitationData) => {
+        // Ensure consistent date parsing for sorting (e.g., "6 Jun" -> "Jun 6")
+        const dateA = new Date(a.date.replace(/(\d+)\s(\w+)/, '$2 $1')).getTime();
+        const dateB = new Date(b.date.replace(/(\d+)\s(\w+)/, '$2 $1')).getTime();
         return dateA - dateB;
       });
-
 
       setPrecipitationData(transformedData);
     } catch (error) {
       console.error('Error fetching monthly precipitation data:', error);
-      setError(t('failed_to_fetch_precipitation_month')); // You might need a new translation key
+      setError(t('failed_to_fetch_precipitation_month'));
       setShowGraphs(false);
       setPrecipitationData([]);
     } finally {
       setIsLoadingPrecipitation(false);
     }
   }, [weatherData, currentMonthDate, setPrecipitationData, setIsLoadingPrecipitation, setShowGraphs, setError, t]);
+
+  // Use useEffect to trigger data fetching when currentMonthDate or weatherData changes
+  useEffect(() => {
+    if (weatherData && showGraphs) { // Only fetch if a location is selected and graphs are meant to be shown
+      fetchMonthData();
+    } else if (!weatherData) {
+      // If no weatherData, ensure graphs are hidden and data is cleared
+      setShowGraphs(false);
+      setPrecipitationData([]);
+    }
+  }, [currentMonthDate, weatherData, showGraphs, fetchMonthData, setPrecipitationData, setShowGraphs]); // Add showGraphs to dependencies
 
   const handlePreviousMonth = () => {
     setCurrentMonthDate((prevDate) => {
@@ -109,7 +114,6 @@ export default function GraphsDisplay({
     });
   };
 
-  // Check if the current displayed month is the actual current month
   const isCurrentMonth = useMemo(() => {
     const today = new Date();
     return (
@@ -163,8 +167,6 @@ export default function GraphsDisplay({
     </ResponsiveContainer>
   );
 
-  // getLocaleForDateFormatting removed as it's no longer used
-
   return (
     <div className="mt-4">
       {/* Navigation and Month Display */}
@@ -191,7 +193,7 @@ export default function GraphsDisplay({
       {/* Button to show graphs, hidden if graphs are already shown and data exists */}
       {!showGraphs && precipitationData.length === 0 && (
         <button
-          onClick={fetchMonthData} // Call fetchMonthData directly on click
+          onClick={() => setShowGraphs(true)} // Only set showGraphs to true, useEffect will handle fetching
           className={`w-full p-2 mb-4 bg-blue-500 text-white rounded hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 ${
             !weatherData ? 'opacity-75 cursor-not-allowed' : ''
           }`}

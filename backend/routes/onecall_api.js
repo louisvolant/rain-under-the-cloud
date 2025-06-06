@@ -65,7 +65,17 @@ router.get('/onecalldaysummary', async (req, res) => {
 async function fetchAndSaveMonthSummary(lat, lon, year, month) {
     try {
         const startDate = new Date(year, month - 1, 1); // Month is 0-indexed in Date object
-        const endDate = new Date(year, month, 0); // Last day of the month
+        const today = new Date();
+        let endDate;
+
+        // If the requested month and year is the current month and year,
+        // limit the end date to today's date.
+        if (year === today.getFullYear() && month === (today.getMonth() + 1)) {
+            endDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+        } else {
+            // Otherwise, get the last day of the requested month
+            endDate = new Date(year, month, 0); // Correctly gets the last day of 'month - 1'
+        }
 
         const dailySummaries = [];
         let currentDate = new Date(startDate);
@@ -77,8 +87,6 @@ async function fetchAndSaveMonthSummary(lat, lon, year, month) {
                 dailySummaries.push(dayResult.data);
             } else {
                 console.warn(`Could not fetch data for ${formattedDate}:`, dayResult.error);
-                // Decide how to handle missing days: skip, add empty data, or throw error
-                // For now, we'll just push what we get, or handle errors gracefully
             }
             currentDate.setDate(currentDate.getDate() + 1);
         }
