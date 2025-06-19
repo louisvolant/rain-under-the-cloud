@@ -44,9 +44,9 @@ export default function WeatherDisplay({ weatherData, rainFallsData, snowDepthDa
 
   // Use the timezone from weatherData, fallback to UTC
   const timezone = weatherData.timezone || 'UTC';
-  console.log('weatherData.timezone:', weatherData.timezone);
-  console.log('weatherData.timezone_offset:', weatherData.timezone_offset);
-  console.log('language:', language);
+  console.debug('weatherData.timezone:', weatherData.timezone);
+  console.debug('weatherData.timezone_offset:', weatherData.timezone_offset);
+  console.debug('language:', language);
 
   return (
     <div className={`p-4 rounded mb-4 ${darkMode ? 'bg-blue-900' : 'bg-blue-100'} text-gray-900 dark:text-gray-200`}>
