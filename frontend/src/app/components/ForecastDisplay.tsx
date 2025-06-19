@@ -62,20 +62,40 @@ export default function ForecastDisplay({ weatherData, forecastData, setForecast
     }
   };
 
+  // Format time to the location's timezone with dynamic separator
+  const formatForecastTime = (timestamp: number, timezone: string) => {
+    const formattedTime = new Intl.DateTimeFormat(language === 'fr' ? 'fr-FR' : 'en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: timezone || 'UTC', // Fallback to UTC
+      hour12: false, // 24-hour format
+    }).format(new Date(timestamp * 1000));
+    // Use 'h' separator for French, ':' for others
+    return language === 'fr' ? formattedTime.replace(':', 'h') : formattedTime;
+  };
 
-  const groupForecastByDay = (forecast: ForecastData) => {
+  const groupForecastByDay = (forecast: ForecastData, timezone: string) => {
     const currentDate = new Date();
+    // Adjust current time to the location's timezone
+    const currentLocalTime = new Date(
+      currentDate.toLocaleString('en-US', { timeZone: timezone || 'UTC' })
+    );
     const grouped: { [key: string]: { dt: number; main: { temp: number }; weather: { description: string; icon: string }[] }[] } = {};
     const dateLabels: { [key: string]: string } = {};
 
     forecast.list.forEach((item) => {
       const date = new Date(item.dt * 1000);
-      const dateKey = date.toLocaleDateString();
-      if (!grouped[dateKey]) {
-        grouped[dateKey] = [];
-        dateLabels[dateKey] = formatDateDisplay(date, currentDate);
+      // Adjust forecast time to the location's timezone
+      const localDate = new Date(date.toLocaleString('en-US', { timeZone: timezone || 'UTC' }));
+      // Only include future times
+      if (localDate.getTime() >= currentLocalTime.getTime()) {
+        const dateKey = localDate.toLocaleDateString();
+        if (!grouped[dateKey]) {
+          grouped[dateKey] = [];
+          dateLabels[dateKey] = formatDateDisplay(localDate, currentLocalTime);
+        }
+        grouped[dateKey].push(item);
       }
-      grouped[dateKey].push(item);
     });
 
     return { grouped, dateLabels };
@@ -85,7 +105,7 @@ export default function ForecastDisplay({ weatherData, forecastData, setForecast
     if (weatherData && !forecastData) {
       handleShowForecast();
     }
-  },[weatherData, forecastData, handleShowForecast]);
+  }, [weatherData, forecastData, handleShowForecast]);
 
   return (
     <div className="mb-4">
@@ -104,37 +124,34 @@ export default function ForecastDisplay({ weatherData, forecastData, setForecast
           <h2 className="text-2xl font-semibold mb-3">{t('weather_forecast_title')}</h2>
           <div className="flex flex-col gap-6">
             {(() => {
-              const { grouped, dateLabels } = groupForecastByDay(forecastData);
+              const timezone = weatherData?.timezone || 'UTC';
+              const { grouped, dateLabels } = groupForecastByDay(forecastData, timezone);
               return Object.entries(grouped).map(([dateKey, items]) => (
                 <div key={dateKey} className="flex flex-col">
                   <h3 className="text-lg font-medium mb-2">{dateLabels[dateKey]}</h3>
                   <div className="overflow-x-auto scroll-smooth">
                     <div className="flex flex-row gap-2">
-                      {items.map((item, index) => {
-                        return (
-                            <div
-                              key={index}
-                              className={`flex flex-col items-center min-w-[100px] p-1 border-r-[0.5px] last:border-r-0 ${
-                                darkMode ? 'border-gray-600' : 'border-gray-300'
-                              }`}
-                            >
-                              <span className="text-xs font-medium mb-1">{new Date(item.dt * 1000).getHours()}h</span>
-
-                              <div className={`flex-shrink-0 rounded-full p-1 mb-1 ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
-                                    <i
-                                      className={`wi ${weatherIconMap[item.weather[0].icon]} text-3xl ${
-                                        weatherIconColorMap[item.weather[0].icon]
-                                      } ${weatherIconAnimationMap[item.weather[0].icon] || ''}`}
-                                    />
-                              </div>
-
-                              <span className="text-xs font-medium mb-1">{item.main.temp.toFixed(1)}°C</span>
-                              <span className="text-[10px] text-center capitalize">
-                                {tWeather(item.weather[0].description)}
-                              </span>
-                            </div>
-                        );
-                      })}
+                      {items.map((item, index) => (
+                        <div
+                          key={index}
+                          className={`flex flex-col items-center min-w-[100px] p-1 border-r-[0.5px] last:border-r-0 ${
+                            darkMode ? 'border-gray-600' : 'border-gray-300'
+                          }`}
+                        >
+                          <span className="text-xs font-medium mb-1">{formatForecastTime(item.dt, timezone)}</span>
+                          <div className={`flex-shrink-0 rounded-full p-1 mb-1 ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
+                            <i
+                              className={`wi ${weatherIconMap[item.weather[0].icon]} text-3xl ${
+                                weatherIconColorMap[item.weather[0].icon]
+                              } ${weatherIconAnimationMap[item.weather[0].icon] || ''}`}
+                            />
+                          </div>
+                          <span className="text-xs font-medium mb-1">{item.main.temp.toFixed(1)}°C</span>
+                          <span className="text-[10px] text-center capitalize">
+                            {tWeather(item.weather[0].description)}
+                          </span>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </div>
