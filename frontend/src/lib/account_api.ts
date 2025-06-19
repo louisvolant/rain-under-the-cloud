@@ -2,7 +2,7 @@
 import axios from 'axios';
 import { FavoriteLocation } from '@/lib/types';
 
-console.log('BACKEND_URL:', process.env.BACKEND_URL);
+console.debug('BACKEND_URL:', process.env.BACKEND_URL);
 
 const api = axios.create({
   baseURL: process.env.BACKEND_URL,

@@ -1,3 +1,4 @@
+// src/components/WeatherDisplay.tsx
 'use client';
 
 import { WeatherData } from '@/lib/types';
