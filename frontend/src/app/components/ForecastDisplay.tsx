@@ -1,6 +1,6 @@
 // src/components/ForecastDisplay.tsx
 'use client';
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useRef } from 'react';
 import { ForecastData, WeatherData } from '@/lib/types';
 import { useTheme } from './ThemeProvider';
 import { useLanguage } from '@/context/LanguageContext';
@@ -17,15 +17,25 @@ interface ForecastDisplayProps {
 export default function ForecastDisplay({ weatherData, forecastData, setForecastData, setError }: ForecastDisplayProps) {
   const { darkMode } = useTheme();
   const { language, t, tWeather } = useLanguage();
+  const isFetchingRef = useRef(false); // Track if a fetch is in progress
 
   const handleShowForecast = useCallback(async () => {
-    if (!weatherData) return;
+    if (!weatherData || isFetchingRef.current) {
+      console.debug('Skipping handleShowForecast: no weatherData or fetch in progress');
+      return;
+    }
+    console.debug('Calling getForecast with lat:', weatherData.coord.lat, 'lon:', weatherData.coord.lon);
+    isFetchingRef.current = true; // Set flag to prevent duplicate calls
     try {
       const data = await getForecast(weatherData.coord.lat.toString(), weatherData.coord.lon.toString());
+      console.debug('Forecast data received:', data);
       setForecastData(data);
       setError(null);
-    } catch {
+    } catch (error) {
+      console.debug('Error fetching forecast:', error);
       setError(t('failed_to_fetch_forecast'));
+    } finally {
+      isFetchingRef.current = false; // Reset flag after fetch completes
     }
   }, [weatherData, setForecastData, setError, t]);
 
@@ -118,7 +128,8 @@ export default function ForecastDisplay({ weatherData, forecastData, setForecast
   };
 
   useEffect(() => {
-    if (weatherData && !forecastData) {
+    console.debug('useEffect triggered: weatherData=', !!weatherData, 'forecastData=', !!forecastData);
+    if (weatherData && !forecastData && !isFetchingRef.current) {
       handleShowForecast();
     }
   }, [weatherData, forecastData, handleShowForecast]);
