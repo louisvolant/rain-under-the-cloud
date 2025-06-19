@@ -64,12 +64,25 @@ export default function ForecastDisplay({ weatherData, forecastData, setForecast
 
   // Format time to the location's timezone with dynamic separator
   const formatForecastTime = (timestamp: number, timezone: string) => {
-    const formattedTime = new Intl.DateTimeFormat(language === 'fr' ? 'fr-FR' : 'en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-      timeZone: timezone || 'UTC', // Fallback to UTC
-      hour12: false, // 24-hour format
-    }).format(new Date(timestamp * 1000));
+    let formattedTime;
+    try {
+      formattedTime = new Intl.DateTimeFormat(language === 'fr' ? 'fr-FR' : 'en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        timeZone: timezone || 'UTC', // Fallback to UTC
+        hour12: false, // 24-hour format
+      }).format(new Date(timestamp * 1000));
+    } catch (error) {
+      console.debug('Error in formatForecastTime:', error);
+      // Fallback to UTC
+      formattedTime = new Intl.DateTimeFormat(language === 'fr' ? 'fr-FR' : 'en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        timeZone: 'UTC',
+        hour12: false,
+      }).format(new Date(timestamp * 1000));
+    }
+    console.debug(`formatForecastTime: timestamp=${timestamp}, timezone=${timezone}, output=${formattedTime}`);
     // Use 'h' separator for French, ':' for others
     return language === 'fr' ? formattedTime.replace(':', 'h') : formattedTime;
   };
@@ -80,6 +93,8 @@ export default function ForecastDisplay({ weatherData, forecastData, setForecast
     const currentLocalTime = new Date(
       currentDate.toLocaleString('en-US', { timeZone: timezone || 'UTC' })
     );
+    console.debug('timezone:', timezone);
+    console.debug('currentLocalTime:', currentLocalTime);
     const grouped: { [key: string]: { dt: number; main: { temp: number }; weather: { description: string; icon: string }[] }[] } = {};
     const dateLabels: { [key: string]: string } = {};
 
@@ -87,6 +102,7 @@ export default function ForecastDisplay({ weatherData, forecastData, setForecast
       const date = new Date(item.dt * 1000);
       // Adjust forecast time to the location's timezone
       const localDate = new Date(date.toLocaleString('en-US', { timeZone: timezone || 'UTC' }));
+      console.debug('item.dt:', item.dt, 'localDate:', localDate);
       // Only include future times
       if (localDate.getTime() >= currentLocalTime.getTime()) {
         const dateKey = localDate.toLocaleDateString();

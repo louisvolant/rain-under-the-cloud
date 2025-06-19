@@ -21,30 +21,57 @@ export default function WeatherDisplay({ weatherData, rainFallsData, snowDepthDa
 
   // Format time to the location's timezone using the IANA timezone
   const formatTime = (timestamp: number, timezone: string) => {
-    const formattedTime = new Intl.DateTimeFormat(language || 'en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-      timeZone: timezone || 'UTC', // Fallback to UTC
-      hour12: false, // 24-hour format
-    }).format(new Date(timestamp * 1000));
+    let formattedTime;
+    try {
+      formattedTime = new Intl.DateTimeFormat(language === 'fr' ? 'fr-FR' : 'en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        timeZone: timezone || 'UTC', // Fallback to UTC
+        hour12: false, // 24-hour format
+      }).format(new Date(timestamp * 1000));
+    } catch (error) {
+      console.debug('Error using IANA timezone:', error);
+      // Fallback to UTC without offset
+      formattedTime = new Intl.DateTimeFormat(language === 'fr' ? 'fr-FR' : 'en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        timeZone: 'UTC',
+        hour12: false,
+      }).format(new Date(timestamp * 1000));
+    }
+    console.debug(`formatTime input: timestamp=${timestamp}, timezone=${timezone}, output=${formattedTime}`);
     // Use 'h' separator for French, ':' for others
     return language === 'fr' ? formattedTime.replace(':', 'h') : formattedTime;
   };
 
   // Format current time in the location's timezone
   const formatCurrentTime = (timezone: string) => {
-    const formattedTime = new Intl.DateTimeFormat(language || 'en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-      timeZone: timezone || 'UTC', // Fallback to UTC
-      hour12: false, // 24-hour format
-    }).format(new Date());
+    let formattedTime;
+    try {
+      formattedTime = new Intl.DateTimeFormat(language === 'fr' ? 'fr-FR' : 'en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        timeZone: timezone || 'UTC', // Fallback to UTC
+        hour12: false, // 24-hour format
+      }).format(new Date());
+    } catch (error) {
+      console.debug('Error formatting current time with IANA timezone:', error);
+      // Fallback to UTC
+      formattedTime = new Intl.DateTimeFormat(language === 'fr' ? 'fr-FR' : 'en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        timeZone: 'UTC',
+        hour12: false,
+      }).format(new Date());
+    }
+    console.debug(`formatCurrentTime: timezone=${timezone}, output=${formattedTime}`);
     // Use 'h' separator for French, ':' for others
     return language === 'fr' ? formattedTime.replace(':', 'h') : formattedTime;
   };
 
   // Use the timezone from weatherData, fallback to UTC
   const timezone = weatherData.timezone || 'UTC';
+  console.debug('weatherData:', weatherData);
   console.debug('weatherData.timezone:', weatherData.timezone);
   console.debug('weatherData.timezone_offset:', weatherData.timezone_offset);
   console.debug('language:', language);
