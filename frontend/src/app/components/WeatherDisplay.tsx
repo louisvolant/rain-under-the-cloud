@@ -1,4 +1,3 @@
-// src/components/WeatherDisplay.tsx
 'use client';
 
 import { WeatherData } from '@/lib/types';
@@ -16,11 +15,38 @@ interface WeatherDisplayProps {
 
 export default function WeatherDisplay({ weatherData, rainFallsData, snowDepthData }: WeatherDisplayProps) {
   const { darkMode } = useTheme();
-  const { t, tWeather } = useLanguage();
+  const { t, tWeather, language } = useLanguage();
   if (!weatherData) return null;
 
-  const formatTime = (timestamp: number) =>
-    new Date(timestamp * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  // Format time to the location's timezone using the IANA timezone
+  const formatTime = (timestamp: number, timezone: string) => {
+    const formattedTime = new Intl.DateTimeFormat(language || 'en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: timezone || 'UTC', // Fallback to UTC
+      hour12: false, // 24-hour format
+    }).format(new Date(timestamp * 1000));
+    // Use 'h' separator for French, ':' for others
+    return language === 'fr' ? formattedTime.replace(':', 'h') : formattedTime;
+  };
+
+  // Format current time in the location's timezone
+  const formatCurrentTime = (timezone: string) => {
+    const formattedTime = new Intl.DateTimeFormat(language || 'en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: timezone || 'UTC', // Fallback to UTC
+      hour12: false, // 24-hour format
+    }).format(new Date());
+    // Use 'h' separator for French, ':' for others
+    return language === 'fr' ? formattedTime.replace(':', 'h') : formattedTime;
+  };
+
+  // Use the timezone from weatherData, fallback to UTC
+  const timezone = weatherData.timezone || 'UTC';
+  console.log('weatherData.timezone:', weatherData.timezone);
+  console.log('weatherData.timezone_offset:', weatherData.timezone_offset);
+  console.log('language:', language);
 
   return (
     <div className={`p-4 rounded mb-4 ${darkMode ? 'bg-blue-900' : 'bg-blue-100'} text-gray-900 dark:text-gray-200`}>
@@ -28,7 +54,7 @@ export default function WeatherDisplay({ weatherData, rainFallsData, snowDepthDa
         {weatherData.country && (
           <span className={`fi fi-${weatherData.country.toLowerCase()} mr-2 rounded`}></span>
         )}
-        {weatherData.name}
+        {weatherData.name} <span className="text-sm ml-1">({formatCurrentTime(timezone)})</span>
       </h2>
 
       {/* Temperature */}
@@ -85,10 +111,10 @@ export default function WeatherDisplay({ weatherData, rainFallsData, snowDepthDa
       {/* Sunrise & Sunset */}
       <div className="text-xs mt-3 flex gap-4">
         <div className="flex items-center gap-1">
-          <Sunrise className="w-4 h-4" /> {formatTime(weatherData.sys.sunrise)}
+          <Sunrise className="w-4 h-4" /> {formatTime(weatherData.sys.sunrise, timezone)}
         </div>
         <div className="flex items-center gap-1">
-          <Sunset className="w-4 h-4" /> {formatTime(weatherData.sys.sunset)}
+          <Sunset className="w-4 h-4" /> {formatTime(weatherData.sys.sunset, timezone)}
         </div>
       </div>
     </div>

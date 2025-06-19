@@ -41,6 +41,8 @@ export interface WeatherData {
   clouds: { all: number };
   visibility: number;
   coord: { lat: number; lon: number };
+  timezone: string;
+  timezone_offset: number;
   sys: { sunrise: number; sunset: number };
 }
 

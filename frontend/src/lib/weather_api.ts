@@ -53,6 +53,8 @@ export const getWeatherAndSnow = async (latitude: number, longitude: number) => 
       visibility: currentData.visibility,
       coord: { lat: latitude, lon: longitude },
       sys: { sunrise: currentData.sunrise, sunset: currentData.sunset },
+      timezone: response.data?.timezone,
+      timezone_offset: response.data?.timezone_offset
     };
 
     const rainFalls = dailyData[0].rain ?? null;
