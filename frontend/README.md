@@ -25,15 +25,24 @@ Sun Over The Cloud is a comprehensive weather application built with Next.js tha
 - **Customizable Time Range**: Adjust the number of days for historical data viewing
 
 ## Technical Stack
-- Next.js (React framework)
+- Next.js 16.3.1 (React framework)
+- React / React DOM 19.2.8
+- TypeScript 6.0.3
+- ESLint 9.39.1 (flat config, `eslint-config-next` 16.3.1)
+- Tailwind CSS 4 for styling
 - Recharts for data visualization
-- Tailwind CSS for styling
 - Environment variables for backend configuration
+
+### Frontend scripts
+- `npm run dev` — start the development server (Turbopack)
+- `npm run build` — production build (webpack) + type check
+- `npm run start` — serve the production build
+- `npm run lint` — run ESLint
 
 ## Setup
 
 ### Prerequisites
-- Node.js (latest stable version)
+- Node.js 24 (LTS) or newer
 - npm or yarn
 - A backend service configured with weather API integration
 
